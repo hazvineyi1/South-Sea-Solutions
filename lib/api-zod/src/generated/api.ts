@@ -63,7 +63,10 @@ export const GetFleetSummaryResponse = zod.object({
   "needsAttentionCount": zod.number(),
   "fleetCertifiedPct": zod.number(),
   "movingCount": zod.number(),
-  "idlingCount": zod.number()
+  "idlingCount": zod.number(),
+  "avgSpeedKph": zod.number().optional(),
+  "avgFuelPct": zod.number().optional(),
+  "totalOdometerKm": zod.number().optional()
 })
 
 
@@ -77,11 +80,15 @@ export const GetVehicleRowsResponseItem = zod.object({
   "driverName": zod.string(),
   "status": zod.string(),
   "certification": zod.string(),
-  "speedKph": zod.number(),
-  "fuelPct": zod.number(),
+  "speedKph": zod.number().optional(),
+  "fuelPct": zod.number().optional(),
   "crossBorder": zod.boolean(),
   "needsAttention": zod.boolean(),
-  "placeLabel": zod.string().nullish()
+  "placeLabel": zod.string().nullish(),
+  "odometerKm": zod.number().nullish(),
+  "lat": zod.number().nullish(),
+  "lng": zod.number().nullish(),
+  "lastPingAt": zod.string().nullish()
 })
 export const GetVehicleRowsResponse = zod.array(GetVehicleRowsResponseItem)
 

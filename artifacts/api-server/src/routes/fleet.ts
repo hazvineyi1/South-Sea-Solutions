@@ -9,6 +9,8 @@ import {
   driversNeedingAttention,
   buildVehicleRows,
   buildFleetSummary,
+  redactVehicleRowsForOperator,
+  redactFleetSummaryForOperator,
 } from "../lib/portal";
 
 const router: IRouter = Router();
@@ -25,7 +27,9 @@ router.get("/fleet/summary", requireAuth, requireRole("OWNER", "OPERATOR"), asyn
   const alerts = buildAlerts(ctx, ackKeys);
   const needs = driversNeedingAttention(alerts);
   const rows = buildVehicleRows(ctx, needs);
-  res.json(GetFleetSummaryResponse.parse(buildFleetSummary(ctx, rows)));
+  const summary = buildFleetSummary(ctx, rows);
+  const payload = req.user!.role === "OWNER" ? summary : redactFleetSummaryForOperator(summary);
+  res.json(GetFleetSummaryResponse.parse(payload));
 });
 
 router.get("/fleet/vehicles", requireAuth, requireRole("OWNER", "OPERATOR"), async (req, res): Promise<void> => {
@@ -35,7 +39,8 @@ router.get("/fleet/vehicles", requireAuth, requireRole("OWNER", "OPERATOR"), asy
   const alerts = buildAlerts(ctx, ackKeys);
   const needs = driversNeedingAttention(alerts);
   const rows = buildVehicleRows(ctx, needs);
-  res.json(GetVehicleRowsResponse.parse(rows));
+  const payload = req.user!.role === "OWNER" ? rows : redactVehicleRowsForOperator(rows);
+  res.json(GetVehicleRowsResponse.parse(payload));
 });
 
 export default router;

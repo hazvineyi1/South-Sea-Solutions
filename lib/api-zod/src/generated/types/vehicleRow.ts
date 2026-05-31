@@ -14,10 +14,18 @@ export interface VehicleRow {
   driverName: string;
   status: string;
   certification: string;
-  speedKph: number;
-  fuelPct: number;
+  speedKph?: number;
+  fuelPct?: number;
   crossBorder: boolean;
   needsAttention: boolean;
   /** @nullable */
   placeLabel?: string | null;
+  /** @nullable */
+  odometerKm?: number | null;
+  /** @nullable */
+  lat?: number | null;
+  /** @nullable */
+  lng?: number | null;
+  /** @nullable */
+  lastPingAt?: string | null;
 }

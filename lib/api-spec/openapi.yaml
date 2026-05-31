@@ -274,6 +274,12 @@ components:
           type: integer
         idlingCount:
           type: integer
+        avgSpeedKph:
+          type: integer
+        avgFuelPct:
+          type: integer
+        totalOdometerKm:
+          type: integer
     VehicleRow:
       type: object
       required:
@@ -283,8 +289,6 @@ components:
         - driverName
         - status
         - certification
-        - speedKph
-        - fuelPct
         - crossBorder
         - needsAttention
       properties:
@@ -309,6 +313,14 @@ components:
         needsAttention:
           type: boolean
         placeLabel:
+          type: ["string", "null"]
+        odometerKm:
+          type: ["integer", "null"]
+        lat:
+          type: ["number", "null"]
+        lng:
+          type: ["number", "null"]
+        lastPingAt:
           type: ["string", "null"]
     Clock:
       type: object

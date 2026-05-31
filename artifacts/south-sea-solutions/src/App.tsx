@@ -7,6 +7,7 @@ import { RequireAuth, PortalIndex } from "@/portal/guards";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
 import LoginPage from "@/pages/portal/login";
+import CommandPage from "@/pages/portal/command";
 import FleetPage from "@/pages/portal/fleet";
 import DriverRecordPage from "@/pages/portal/driver-record";
 import DriverHomePage from "@/pages/portal/driver-home";
@@ -19,6 +20,11 @@ function Router() {
       <Route path="/" component={Home} />
       <Route path="/login" component={LoginPage} />
       <Route path="/portal" component={PortalIndex} />
+      <Route path="/portal/command">
+        <RequireAuth roles={["OWNER"]}>
+          <CommandPage />
+        </RequireAuth>
+      </Route>
       <Route path="/portal/fleet">
         <RequireAuth roles={["OWNER", "OPERATOR"]}>
           <FleetPage />

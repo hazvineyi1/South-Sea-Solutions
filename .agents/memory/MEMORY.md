@@ -1,2 +1,3 @@
 - [Generated query hook usage](orval-query-hooks.md) — hooks are `export function useGetXxx`; passing partial `query` options requires also passing the matching `getGetXxxQueryKey()`.
 - [Portal multi-tenancy rules](portal-tenancy.md) — every read scoped by orgId; operator-only endpoints (incl. read-only setup) need requireRole; driver reads write audit log.
+- [Role-based data redaction](role-data-redaction.md) — fields a role must not see (e.g. operator vs owner telemetry) must be stripped server-side by role, not just hidden in the UI.

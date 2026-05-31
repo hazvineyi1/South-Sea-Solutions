@@ -13,4 +13,7 @@ export interface FleetSummary {
   fleetCertifiedPct: number;
   movingCount: number;
   idlingCount: number;
+  avgSpeedKph?: number;
+  avgFuelPct?: number;
+  totalOdometerKm?: number;
 }

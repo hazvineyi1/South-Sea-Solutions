@@ -222,11 +222,15 @@ export interface VehicleRowOut {
   driverName: string;
   status: string;
   certification: string;
-  speedKph: number;
-  fuelPct: number;
+  speedKph?: number;
+  fuelPct?: number;
   crossBorder: boolean;
   needsAttention: boolean;
-  placeLabel: string | null;
+  placeLabel?: string | null;
+  odometerKm?: number | null;
+  lat?: number | null;
+  lng?: number | null;
+  lastPingAt?: string | null;
 }
 
 export function buildVehicleRows(ctx: FleetContext, needsAttention: Set<string>): VehicleRowOut[] {
@@ -256,6 +260,10 @@ export function buildVehicleRows(ctx: FleetContext, needsAttention: Set<string>)
       crossBorder: place ? CROSS_BORDER.test(place) : false,
       needsAttention: driver ? needsAttention.has(driver.id) : false,
       placeLabel: place,
+      odometerKm: fuel?.odometerKm ?? null,
+      lat: ping?.lat ?? null,
+      lng: ping?.lng ?? null,
+      lastPingAt: ping?.recordedAt ? toIso(ping.recordedAt) : null,
     });
   }
 
@@ -266,13 +274,54 @@ export function buildVehicleRows(ctx: FleetContext, needsAttention: Set<string>)
 export function buildFleetSummary(ctx: FleetContext, rows: VehicleRowOut[]) {
   const certifiedDrivers = ctx.drivers.filter((d) => ctx.certByDriver.get(d.id)?.status === "CERTIFIED").length;
   const totalDrivers = ctx.drivers.length || 1;
+  const moving = rows.filter((r) => r.status === "MOVING");
+  const avgSpeedKph = moving.length
+    ? Math.round(moving.reduce((sum, r) => sum + (r.speedKph ?? 0), 0) / moving.length)
+    : 0;
+  const fuelRows = rows.filter((r) => typeof r.fuelPct === "number");
+  const avgFuelPct = fuelRows.length
+    ? Math.round(fuelRows.reduce((sum, r) => sum + (r.fuelPct ?? 0), 0) / fuelRows.length)
+    : 0;
+  const totalOdometerKm = rows.reduce((sum, r) => sum + (r.odometerKm ?? 0), 0);
   return {
     activeVehicles: rows.length,
     crossBorderCount: rows.filter((r) => r.crossBorder).length,
     needsAttentionCount: rows.filter((r) => r.needsAttention).length,
     fleetCertifiedPct: Math.round((100 * certifiedDrivers) / totalDrivers),
-    movingCount: rows.filter((r) => r.status === "MOVING").length,
+    movingCount: moving.length,
     idlingCount: rows.filter((r) => r.status === "IDLING").length,
+    avgSpeedKph,
+    avgFuelPct,
+    totalOdometerKm,
+  };
+}
+
+type FleetSummaryOut = ReturnType<typeof buildFleetSummary>;
+
+// Live telemetry (speed, fuel, position, odometer, last ping and fleet aggregates) is
+// owner-only. Operators get a compliance and certification view, so we strip these fields
+// at the API layer for any non-OWNER role rather than relying on the client to hide them.
+export function redactVehicleRowsForOperator(rows: VehicleRowOut[]): VehicleRowOut[] {
+  return rows.map((r) => ({
+    vehicleId: r.vehicleId,
+    reg: r.reg,
+    driverId: r.driverId,
+    driverName: r.driverName,
+    status: r.status,
+    certification: r.certification,
+    crossBorder: r.crossBorder,
+    needsAttention: r.needsAttention,
+  }));
+}
+
+export function redactFleetSummaryForOperator(summary: FleetSummaryOut) {
+  return {
+    activeVehicles: summary.activeVehicles,
+    crossBorderCount: summary.crossBorderCount,
+    needsAttentionCount: summary.needsAttentionCount,
+    fleetCertifiedPct: summary.fleetCertifiedPct,
+    movingCount: summary.movingCount,
+    idlingCount: summary.idlingCount,
   };
 }
 

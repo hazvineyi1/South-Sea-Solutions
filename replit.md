@@ -37,7 +37,8 @@ A login-gated, multi-tenant portal hub built on the South Sea Solutions marketin
 
 ## Architecture decisions
 
-- Single gateway login at `/login`; role-based redirect to the right portal view (OWNER/OPERATOR see fleet, DRIVER sees own record).
+- Single gateway login at `/login`; role-based redirect to the right portal view (OWNER sees the full-telemetry command center, OPERATOR sees the leaner operations view, DRIVER sees own record).
+- OWNER vs OPERATOR portals are genuinely different. Live telemetry (speed, fuel, position, odometer, last ping, and the fleet telemetry aggregates) is OWNER-only and is redacted at the API layer (`redactVehicleRowsForOperator`, `redactFleetSummaryForOperator` in `portal.ts`), not just hidden in the UI. `/portal/command` is also route-guarded to OWNER only.
 - Multi-tenant: every data read is scoped by `req.user.orgId`. The driver record route additionally enforces DRIVER self-only access and an org match.
 - Every successful driver-record read writes an `audit_logs` row.
 - Frontend and API share an origin via the reverse proxy, so the httpOnly session cookie flows automatically; the client uses relative `/api` URLs.
@@ -45,8 +46,9 @@ A login-gated, multi-tenant portal hub built on the South Sea Solutions marketin
 
 ## Product
 
-- Operators log in and see a live fleet dashboard (metrics, vehicle list with status/certification/fuel), acknowledge alerts, and edit the hours-of-service rule profile.
-- Operators open any driver record in their org: overview, hours (continuous/daily/weekly clocks), safety incidents, training/certification, and documents.
+- Owners log in to a command center: full fleet telemetry (live speed, fuel, position, odometer, last ping plus fleet aggregates), certification and compliance, acknowledge alerts, and edit the hours-of-service rule profile.
+- Operators log in to a leaner operations view: a driver roster with certification and compliance status (no live telemetry), acknowledge alerts, and edit the rule profile.
+- Owners and operators open any driver record in their org: overview, hours (continuous/daily/weekly clocks), safety incidents, training/certification, and documents.
 - Drivers log in and see only their own record.
 
 ## User preferences

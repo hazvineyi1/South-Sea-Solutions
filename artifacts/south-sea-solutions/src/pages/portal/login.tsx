@@ -7,7 +7,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 function destinationFor(role: string): string {
-  return role === "DRIVER" ? "/portal/me" : "/portal/fleet";
+  if (role === "DRIVER") return "/portal/me";
+  if (role === "OWNER") return "/portal/command";
+  return "/portal/fleet";
 }
 
 export default function LoginPage() {
