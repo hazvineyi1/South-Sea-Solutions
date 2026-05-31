@@ -22,10 +22,10 @@ export function Markets() {
           >
             <h2 className="text-3xl md:text-5xl font-semibold mb-6">Built for where it matters.</h2>
             <p className="text-muted-foreground text-lg leading-relaxed mb-8">
-              We work across sectors where complexity is structural and software failure has serious consequences. Our platforms integrate with legacy systems, withstand regulatory scrutiny, and perform reliably in varied operational conditions.
+              We build web-based SaaS products for a wide range of sectors. Whether the challenge is compliance, operations, learning, or workflow, we design platforms that are built to last and easy to scale.
             </p>
             <div className="flex flex-wrap gap-3">
-              {['Transport', 'Logistics', 'Finance', 'Agriculture', 'Government', 'Resources', 'Healthcare', 'Maritime'].map((tag) => (
+              {['Education', 'Transport', 'Logistics', 'Finance', 'Agriculture', 'Government', 'Healthcare', 'Maritime'].map((tag) => (
                 <span key={tag} className="px-4 py-2 border border-border text-sm font-medium tracking-wide">
                   {tag}
                 </span>

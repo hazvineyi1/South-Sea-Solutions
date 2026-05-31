@@ -13,8 +13,8 @@ const capabilities = [
   },
   {
     id: "03",
-    title: "Full-Stack Engineering",
-    description: "Scalable, secure, and resilient architecture. We build systems that perform reliably across diverse infrastructure and user conditions."
+    title: "SaaS Development",
+    description: "Web-based platforms built to scale. From multi-tenant architecture to role-based access and subscription workflows, we handle the full stack."
   },
   {
     id: "04",
