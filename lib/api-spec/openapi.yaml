@@ -20,6 +20,10 @@ tags:
     description: Derived fleet alerts
   - name: setup
     description: Org setup and rule profile
+  - name: training
+    description: Interactive training for all users
+  - name: platform
+    description: Superadmin platform console
 paths:
   /healthz:
     get:
@@ -209,6 +213,340 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/OrgProfile"
+  /training/modules:
+    get:
+      operationId: getTrainingModules
+      tags: [training]
+      summary: List training modules with the current user's completion state
+      responses:
+        "200":
+          description: Training modules
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TrainingModuleList"
+  /training/modules/{slug}:
+    get:
+      operationId: getTrainingModule
+      tags: [training]
+      summary: Get a single training module by slug
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Training module
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TrainingModuleDetail"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorMessage"
+  /training/modules/{id}/complete:
+    post:
+      operationId: completeTrainingModule
+      tags: [training]
+      summary: Mark a training module complete for the current user
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Marked complete
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorMessage"
+    delete:
+      operationId: uncompleteTrainingModule
+      tags: [training]
+      summary: Clear a training module completion for the current user
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Completion cleared
+  /platform/overview:
+    get:
+      operationId: getPlatformOverview
+      tags: [platform]
+      summary: Cross-org platform overview
+      responses:
+        "200":
+          description: Overview
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PlatformOverview"
+  /platform/orgs:
+    get:
+      operationId: getPlatformOrgs
+      tags: [platform]
+      summary: List all organizations
+      responses:
+        "200":
+          description: Orgs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PlatformOrg"
+    post:
+      operationId: createPlatformOrg
+      tags: [platform]
+      summary: Create an organization
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PlatformOrgInput"
+      responses:
+        "200":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PlatformOrg"
+  /platform/orgs/{id}:
+    patch:
+      operationId: updatePlatformOrg
+      tags: [platform]
+      summary: Update an organization
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PlatformOrgUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PlatformOrg"
+    delete:
+      operationId: deletePlatformOrg
+      tags: [platform]
+      summary: Delete an organization and all its data
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Deleted
+  /platform/orgs/{id}/users:
+    get:
+      operationId: getPlatformOrgUsers
+      tags: [platform]
+      summary: List users in an organization
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PlatformUser"
+    post:
+      operationId: createPlatformOrgUser
+      tags: [platform]
+      summary: Create a user in an organization
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PlatformUserInput"
+      responses:
+        "200":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PlatformUser"
+  /platform/users/{id}:
+    patch:
+      operationId: updatePlatformUser
+      tags: [platform]
+      summary: Update a user (activate or deactivate)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PlatformUserUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PlatformUser"
+  /platform/training/modules:
+    get:
+      operationId: getPlatformTrainingModules
+      tags: [platform]
+      summary: List all training modules for management
+      responses:
+        "200":
+          description: Modules
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TrainingModuleDetail"
+    post:
+      operationId: createPlatformTrainingModule
+      tags: [platform]
+      summary: Create a training module
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TrainingModuleInput"
+      responses:
+        "200":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TrainingModuleDetail"
+  /platform/training/modules/{id}:
+    patch:
+      operationId: updatePlatformTrainingModule
+      tags: [platform]
+      summary: Update a training module
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TrainingModuleInput"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TrainingModuleDetail"
+    delete:
+      operationId: deletePlatformTrainingModule
+      tags: [platform]
+      summary: Delete a training module
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Deleted
+  /platform/training/reorder:
+    post:
+      operationId: reorderPlatformTrainingModules
+      tags: [platform]
+      summary: Reorder training modules
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TrainingReorderInput"
+      responses:
+        "204":
+          description: Reordered
+  /platform/enter-org:
+    post:
+      operationId: enterOrg
+      tags: [platform]
+      summary: Begin impersonating an organization as owner
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EnterOrgInput"
+      responses:
+        "200":
+          description: Now impersonating
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthUser"
+        "404":
+          description: Org not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorMessage"
+  /platform/exit-org:
+    post:
+      operationId: exitOrg
+      tags: [platform]
+      summary: Stop impersonating and return to the platform console
+      responses:
+        "200":
+          description: Impersonation ended
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthUser"
 components:
   schemas:
     HealthStatus:
@@ -236,7 +574,7 @@ components:
           minLength: 1
     AuthUser:
       type: object
-      required: [id, name, email, role, orgId, orgName]
+      required: [id, name, email, role, realRole, orgId, orgName, impersonating]
       properties:
         id:
           type: string
@@ -246,12 +584,16 @@ components:
           type: string
         role:
           type: string
-        orgId:
+        realRole:
           type: string
+        orgId:
+          type: ["string", "null"]
         orgName:
           type: string
         driverId:
           type: ["string", "null"]
+        impersonating:
+          type: boolean
     FleetSummary:
       type: object
       required:
@@ -483,6 +825,34 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/CourseItem"
+        trainingProgress:
+          $ref: "#/components/schemas/TrainingProgress"
+    TrainingProgress:
+      type: object
+      required: [completed, total, modules]
+      properties:
+        completed:
+          type: integer
+        total:
+          type: integer
+        modules:
+          type: array
+          items:
+            $ref: "#/components/schemas/TrainingProgressItem"
+    TrainingProgressItem:
+      type: object
+      required: [slug, title, category, completed]
+      properties:
+        slug:
+          type: string
+        title:
+          type: string
+        category:
+          type: string
+        completed:
+          type: boolean
+        completedAt:
+          type: ["string", "null"]
     Alert:
       type: object
       required: [key, kind, severity, driverId, driverName, message, acknowledged]
@@ -561,3 +931,254 @@ components:
           type: string
         region:
           type: string
+    TrainingModuleSection:
+      type: object
+      required: [heading]
+      properties:
+        heading:
+          type: string
+        body:
+          type: ["string", "null"]
+        steps:
+          type: array
+          items:
+            type: string
+        bullets:
+          type: array
+          items:
+            type: string
+        tip:
+          type: ["string", "null"]
+        warning:
+          type: ["string", "null"]
+    TrainingModuleSummary:
+      type: object
+      required: [id, slug, title, summary, category, icon, minutes, ordinal, completed]
+      properties:
+        id:
+          type: string
+        slug:
+          type: string
+        title:
+          type: string
+        summary:
+          type: string
+        category:
+          type: string
+        icon:
+          type: string
+        minutes:
+          type: integer
+        ordinal:
+          type: integer
+        completed:
+          type: boolean
+        completedAt:
+          type: ["string", "null"]
+    TrainingModuleList:
+      type: object
+      required: [completed, total, modules]
+      properties:
+        completed:
+          type: integer
+        total:
+          type: integer
+        modules:
+          type: array
+          items:
+            $ref: "#/components/schemas/TrainingModuleSummary"
+    TrainingModuleDetail:
+      type: object
+      required: [id, slug, title, summary, category, icon, minutes, ordinal, sections, completed]
+      properties:
+        id:
+          type: string
+        slug:
+          type: string
+        title:
+          type: string
+        summary:
+          type: string
+        category:
+          type: string
+        icon:
+          type: string
+        minutes:
+          type: integer
+        ordinal:
+          type: integer
+        sections:
+          type: array
+          items:
+            $ref: "#/components/schemas/TrainingModuleSection"
+        completed:
+          type: boolean
+        completedAt:
+          type: ["string", "null"]
+    TrainingModuleInput:
+      type: object
+      required: [slug, title, summary, category, icon, minutes, sections]
+      properties:
+        slug:
+          type: string
+          minLength: 1
+        title:
+          type: string
+          minLength: 1
+        summary:
+          type: string
+        category:
+          type: string
+          minLength: 1
+        icon:
+          type: string
+          minLength: 1
+        minutes:
+          type: integer
+        ordinal:
+          type: integer
+        sections:
+          type: array
+          items:
+            $ref: "#/components/schemas/TrainingModuleSection"
+    TrainingReorderInput:
+      type: object
+      required: [ids]
+      properties:
+        ids:
+          type: array
+          items:
+            type: string
+    PlatformOverview:
+      type: object
+      required: [totals, orgs]
+      properties:
+        totals:
+          $ref: "#/components/schemas/PlatformTotals"
+        orgs:
+          type: array
+          items:
+            $ref: "#/components/schemas/PlatformOrgStat"
+    PlatformTotals:
+      type: object
+      required: [orgs, users, drivers, vehicles, openAlerts]
+      properties:
+        orgs:
+          type: integer
+        users:
+          type: integer
+        drivers:
+          type: integer
+        vehicles:
+          type: integer
+        openAlerts:
+          type: integer
+    PlatformOrgStat:
+      type: object
+      required: [id, name, region, active, users, drivers, vehicles, openAlerts]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        region:
+          type: string
+        active:
+          type: boolean
+        users:
+          type: integer
+        drivers:
+          type: integer
+        vehicles:
+          type: integer
+        openAlerts:
+          type: integer
+    PlatformOrg:
+      type: object
+      required: [id, name, region, active, createdAt]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        region:
+          type: string
+        active:
+          type: boolean
+        createdAt:
+          type: string
+    PlatformOrgInput:
+      type: object
+      required: [name, region]
+      properties:
+        name:
+          type: string
+          minLength: 1
+        region:
+          type: string
+          minLength: 1
+    PlatformOrgUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+        region:
+          type: string
+          minLength: 1
+        active:
+          type: boolean
+    PlatformUser:
+      type: object
+      required: [id, name, email, role, active, createdAt]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        email:
+          type: string
+        role:
+          type: string
+        active:
+          type: boolean
+        driverId:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+    PlatformUserInput:
+      type: object
+      required: [name, email, password, role]
+      properties:
+        name:
+          type: string
+          minLength: 1
+        email:
+          type: string
+          minLength: 1
+        password:
+          type: string
+          minLength: 1
+        role:
+          type: string
+          enum: [OWNER, DRIVER]
+        driverId:
+          type: ["string", "null"]
+    PlatformUserUpdate:
+      type: object
+      properties:
+        active:
+          type: boolean
+        role:
+          type: string
+          enum: [OWNER, DRIVER]
+        name:
+          type: string
+          minLength: 1
+    EnterOrgInput:
+      type: object
+      required: [orgId]
+      properties:
+        orgId:
+          type: string
+          minLength: 1

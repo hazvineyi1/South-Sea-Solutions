@@ -30,7 +30,7 @@ import { computeHos, type DutyStatus, type RuleProfileInput } from "./hosEngine"
 export interface FleetContext {
   drivers: Driver[];
   vehiclesById: Map<string, Vehicle>;
-  rule: RuleProfile;
+  rule: RuleProfile | undefined;
   latestPing: Map<string, TripPing>;
   latestFuel: Map<string, FuelReport>;
   certByDriver: Map<string, Certification>;
@@ -66,7 +66,16 @@ function groupByDriver<T extends { driverId: string }>(rows: T[]): Map<string, T
   return map;
 }
 
-export function ruleToInput(rule: RuleProfile): RuleProfileInput {
+const DEFAULT_RULE_INPUT: RuleProfileInput = {
+  contMins: 270,
+  dailyMins: 540,
+  weeklyMins: 3360,
+  dailyRestMins: 660,
+  breakMins: 45,
+};
+
+export function ruleToInput(rule: RuleProfile | undefined): RuleProfileInput {
+  if (!rule) return DEFAULT_RULE_INPUT;
   return {
     contMins: rule.contMins,
     dailyMins: rule.dailyMins,

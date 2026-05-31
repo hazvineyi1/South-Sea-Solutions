@@ -6,16 +6,13 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export interface AuthUser {
+export interface PlatformUser {
   id: string;
   name: string;
   email: string;
   role: string;
-  realRole: string;
-  /** @nullable */
-  orgId: string | null;
-  orgName: string;
+  active: boolean;
   /** @nullable */
   driverId?: string | null;
-  impersonating: boolean;
+  createdAt: string;
 }

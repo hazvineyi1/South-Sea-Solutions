@@ -1,9 +1,29 @@
 import { Link, useParams } from "wouter";
-import { ArrowLeft, ArrowRight, Clock, Lightbulb, AlertTriangle } from "lucide-react";
+import {
+  ArrowLeft,
+  ArrowRight,
+  Clock,
+  Lightbulb,
+  AlertTriangle,
+  CheckCircle2,
+  Circle,
+  Loader2,
+} from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
+import {
+  useGetTrainingModule,
+  getGetTrainingModuleQueryKey,
+  useGetTrainingModules,
+  getGetTrainingModulesQueryKey,
+  useCompleteTrainingModule,
+  useUncompleteTrainingModule,
+  type TrainingModuleSection,
+} from "@workspace/api-client-react";
 import { PortalLayout } from "@/portal/PortalLayout";
-import { trainingModules, getTrainingModule, type TrainingSection } from "./trainingContent";
+import { Button } from "@/components/ui/button";
+import { trainingIcon } from "./trainingIcons";
 
-function Section({ section, index }: { section: TrainingSection; index: number }) {
+function Section({ section, index }: { section: TrainingModuleSection; index: number }) {
   return (
     <section className="border-t pt-6 first:border-t-0 first:pt-0">
       <h2 className="font-display text-lg font-semibold">
@@ -56,7 +76,33 @@ function Section({ section, index }: { section: TrainingSection; index: number }
 export default function TrainingModulePage() {
   const params = useParams();
   const slug = params.slug ?? "";
-  const module = getTrainingModule(slug);
+  const queryClient = useQueryClient();
+
+  const { data: module, isLoading } = useGetTrainingModule(slug, {
+    query: { queryKey: getGetTrainingModuleQueryKey(slug), enabled: slug.length > 0 },
+  });
+  const { data: list } = useGetTrainingModules({
+    query: { queryKey: getGetTrainingModulesQueryKey() },
+  });
+
+  function invalidate() {
+    queryClient.invalidateQueries({ queryKey: getGetTrainingModuleQueryKey(slug) });
+    queryClient.invalidateQueries({ queryKey: getGetTrainingModulesQueryKey() });
+  }
+
+  const complete = useCompleteTrainingModule({ mutation: { onSuccess: invalidate } });
+  const uncomplete = useUncompleteTrainingModule({ mutation: { onSuccess: invalidate } });
+  const pending = complete.isPending || uncomplete.isPending;
+
+  if (isLoading) {
+    return (
+      <PortalLayout>
+        <div className="flex items-center justify-center py-24">
+          <Loader2 className="h-6 w-6 animate-spin text-primary" />
+        </div>
+      </PortalLayout>
+    );
+  }
 
   if (!module) {
     return (
@@ -74,10 +120,20 @@ export default function TrainingModulePage() {
     );
   }
 
-  const Icon = module.icon;
-  const index = trainingModules.findIndex((m) => m.slug === module.slug);
-  const prev = index > 0 ? trainingModules[index - 1] : null;
-  const next = index < trainingModules.length - 1 ? trainingModules[index + 1] : null;
+  const Icon = trainingIcon(module.icon);
+  const ordered = list?.modules ?? [];
+  const index = ordered.findIndex((m) => m.slug === module.slug);
+  const prev = index > 0 ? ordered[index - 1] : null;
+  const next = index >= 0 && index < ordered.length - 1 ? ordered[index + 1] : null;
+
+  function toggleComplete() {
+    if (!module) return;
+    if (module.completed) {
+      uncomplete.mutate({ id: module.id });
+    } else {
+      complete.mutate({ id: module.id });
+    }
+  }
 
   return (
     <PortalLayout>
@@ -94,11 +150,17 @@ export default function TrainingModulePage() {
             <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground">
               <Icon className="h-6 w-6" />
             </span>
-            <div className="min-w-0">
+            <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-2">
                 <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                   {module.category}
                 </span>
+                {module.completed ? (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-[#e3efe9] px-2.5 py-0.5 text-xs font-medium text-[#0f6e60]">
+                    <CheckCircle2 className="h-3.5 w-3.5" />
+                    Completed
+                  </span>
+                ) : null}
               </div>
               <h1 className="mt-1.5 font-display text-2xl font-bold tracking-tight">{module.title}</h1>
               <p className="mt-1.5 text-sm text-muted-foreground">{module.summary}</p>
@@ -113,6 +175,29 @@ export default function TrainingModulePage() {
             {module.sections.map((section, i) => (
               <Section key={i} section={section} index={i} />
             ))}
+          </div>
+
+          <div className="mt-8 flex items-center justify-between gap-3 border-t pt-6">
+            <span className="text-sm text-muted-foreground">
+              {module.completed
+                ? "You have completed this module."
+                : "Mark this module complete when you have finished reading."}
+            </span>
+            <Button
+              variant={module.completed ? "outline" : "default"}
+              onClick={toggleComplete}
+              disabled={pending}
+              className="shrink-0 gap-1.5"
+            >
+              {pending ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : module.completed ? (
+                <Circle className="h-4 w-4" />
+              ) : (
+                <CheckCircle2 className="h-4 w-4" />
+              )}
+              {module.completed ? "Mark as not complete" : "Mark as complete"}
+            </Button>
           </div>
         </div>
 

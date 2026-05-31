@@ -4,6 +4,8 @@ import {
   getGetMeQueryKey,
   useLogin as useLoginMutation,
   useLogout as useLogoutMutation,
+  useEnterOrg as useEnterOrgMutation,
+  useExitOrg as useExitOrgMutation,
   type AuthUser,
 } from "@workspace/api-client-react";
 
@@ -40,6 +42,31 @@ export function useLogout() {
       onSuccess: () => {
         queryClient.setQueryData(getGetMeQueryKey(), null);
         queryClient.clear();
+      },
+    },
+  });
+}
+
+export function useEnterOrg() {
+  const queryClient = useQueryClient();
+  return useEnterOrgMutation({
+    mutation: {
+      onSuccess: (data) => {
+        queryClient.setQueryData(getGetMeQueryKey(), data);
+        // Org-scoped data was loaded as the platform actor; drop it.
+        queryClient.invalidateQueries();
+      },
+    },
+  });
+}
+
+export function useExitOrg() {
+  const queryClient = useQueryClient();
+  return useExitOrgMutation({
+    mutation: {
+      onSuccess: (data) => {
+        queryClient.setQueryData(getGetMeQueryKey(), data);
+        queryClient.invalidateQueries();
       },
     },
   });

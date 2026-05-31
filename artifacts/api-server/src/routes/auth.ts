@@ -25,18 +25,31 @@ function cookieOptions() {
   };
 }
 
-async function buildAuthUser(userId: string) {
-  const [user] = await db.select().from(usersTable).where(eq(usersTable.id, userId));
+async function buildAuthUser(ctx: {
+  userId: string;
+  role: string;
+  realRole: string;
+  orgId: string | null;
+  driverId: string | null;
+  impersonating: boolean;
+}) {
+  const [user] = await db.select().from(usersTable).where(eq(usersTable.id, ctx.userId));
   if (!user) return null;
-  const [org] = await db.select().from(orgsTable).where(eq(orgsTable.id, user.orgId));
+  let orgName = "";
+  if (ctx.orgId) {
+    const [org] = await db.select().from(orgsTable).where(eq(orgsTable.id, ctx.orgId));
+    orgName = org?.name ?? "";
+  }
   return {
     id: user.id,
     name: user.name,
     email: user.email,
-    role: user.role,
-    orgId: user.orgId,
-    orgName: org?.name ?? "",
-    driverId: user.driverId,
+    role: ctx.role,
+    realRole: ctx.realRole,
+    orgId: ctx.orgId,
+    orgName,
+    driverId: ctx.driverId,
+    impersonating: ctx.impersonating,
   };
 }
 
@@ -55,6 +68,12 @@ router.post("/auth/login", async (req, res): Promise<void> => {
     return;
   }
 
+  if (!user.active) {
+    req.log.warn({ userId: user.id }, "Login attempt for deactivated user");
+    res.status(401).json({ error: "Invalid email or password" });
+    return;
+  }
+
   const ok = await verifyPassword(parsed.data.password, user.passwordHash);
   if (!ok) {
     req.log.warn({ userId: user.id }, "Login attempt with bad password");
@@ -65,7 +84,14 @@ router.post("/auth/login", async (req, res): Promise<void> => {
   const sessionId = await createSession(user.id);
   res.cookie(SESSION_COOKIE, sessionId, cookieOptions());
 
-  const authUser = await buildAuthUser(user.id);
+  const authUser = await buildAuthUser({
+    userId: user.id,
+    role: user.role,
+    realRole: user.role,
+    orgId: user.orgId,
+    driverId: user.driverId,
+    impersonating: false,
+  });
   res.json(LoginResponse.parse(authUser));
 });
 
@@ -79,7 +105,15 @@ router.post("/auth/logout", async (req, res): Promise<void> => {
 });
 
 router.get("/auth/me", requireAuth, async (req, res): Promise<void> => {
-  const authUser = await buildAuthUser(req.user!.id);
+  const auth = req.auth!;
+  const authUser = await buildAuthUser({
+    userId: auth.userId,
+    role: auth.role,
+    realRole: auth.realRole,
+    orgId: auth.orgId,
+    driverId: auth.driverId,
+    impersonating: auth.impersonating,
+  });
   res.json(GetMeResponse.parse(authUser));
 });
 

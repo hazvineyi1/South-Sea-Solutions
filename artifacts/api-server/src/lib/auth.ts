@@ -1,7 +1,7 @@
 import { randomBytes, scrypt as scryptCb, timingSafeEqual } from "node:crypto";
 import { promisify } from "node:util";
 import { eq } from "drizzle-orm";
-import { db, sessionsTable, usersTable, type User } from "@workspace/db";
+import { db, sessionsTable, usersTable, type User, type Session } from "@workspace/db";
 
 const scrypt = promisify(scryptCb);
 
@@ -32,7 +32,9 @@ export async function createSession(userId: string): Promise<string> {
   return session.id;
 }
 
-export async function getUserBySession(sessionId: string): Promise<User | null> {
+export async function getSessionWithUser(
+  sessionId: string,
+): Promise<{ session: Session; user: User } | null> {
   const [session] = await db
     .select()
     .from(sessionsTable)
@@ -43,7 +45,17 @@ export async function getUserBySession(sessionId: string): Promise<User | null> 
     return null;
   }
   const [user] = await db.select().from(usersTable).where(eq(usersTable.id, session.userId));
-  return user ?? null;
+  if (!user) return null;
+  return { session, user };
+}
+
+export async function getUserBySession(sessionId: string): Promise<User | null> {
+  const result = await getSessionWithUser(sessionId);
+  return result?.user ?? null;
+}
+
+export async function setActingOrg(sessionId: string, orgId: string | null): Promise<void> {
+  await db.update(sessionsTable).set({ actingOrgId: orgId }).where(eq(sessionsTable.id, sessionId));
 }
 
 export async function destroySession(sessionId: string): Promise<void> {

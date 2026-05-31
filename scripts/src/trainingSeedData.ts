@@ -1,51 +1,24 @@
-import type { LucideIcon } from "lucide-react";
-import {
-  Compass,
-  Users,
-  Gauge,
-  BellRing,
-  FileText,
-  Activity,
-  Clock,
-  SlidersHorizontal,
-  BadgeCheck,
-  Globe,
-  ShieldAlert,
-} from "lucide-react";
+import type { TrainingModuleSection } from "@workspace/db";
 
-export interface TrainingSection {
-  heading: string;
-  body?: string;
-  steps?: string[];
-  bullets?: string[];
-  tip?: string;
-  warning?: string;
-}
-
-export interface TrainingModule {
+export interface TrainingSeedModule {
   slug: string;
   title: string;
   summary: string;
   category: string;
-  icon: LucideIcon;
+  icon: string;
   minutes: number;
-  sections: TrainingSection[];
+  sections: TrainingModuleSection[];
 }
 
-export const TRAINING_CATEGORIES = [
-  "Getting started",
-  "Daily operations",
-  "ELD and hours of service",
-  "Compliance",
-] as const;
-
-export const trainingModules: TrainingModule[] = [
+// Initial platform-wide training content. Icons are stored as Lucide icon names
+// and mapped to components on the frontend.
+export const trainingSeedModules: TrainingSeedModule[] = [
   {
     slug: "welcome-to-drivewise",
     title: "Welcome to Drivewise",
     summary: "What the platform does and how to find your way around it.",
     category: "Getting started",
-    icon: Compass,
+    icon: "Compass",
     minutes: 4,
     sections: [
       {
@@ -77,7 +50,7 @@ export const trainingModules: TrainingModule[] = [
     title: "Roles and access",
     summary: "Who can see what across the portal, and why.",
     category: "Getting started",
-    icon: Users,
+    icon: "Users",
     minutes: 4,
     sections: [
       {
@@ -103,7 +76,7 @@ export const trainingModules: TrainingModule[] = [
     title: "Reading the command center",
     summary: "The owner telemetry dashboard explained, metric by metric.",
     category: "Daily operations",
-    icon: Gauge,
+    icon: "Gauge",
     minutes: 6,
     sections: [
       {
@@ -137,7 +110,7 @@ export const trainingModules: TrainingModule[] = [
     title: "Managing alerts",
     summary: "Spotting, understanding and acknowledging alerts.",
     category: "Daily operations",
-    icon: BellRing,
+    icon: "BellRing",
     minutes: 5,
     sections: [
       {
@@ -146,11 +119,7 @@ export const trainingModules: TrainingModule[] = [
       },
       {
         heading: "Severity levels",
-        bullets: [
-          "High (red): act now.",
-          "Medium (amber): review soon.",
-          "Low (blue): informational.",
-        ],
+        bullets: ["High (red): act now.", "Medium (amber): review soon.", "Low (blue): informational."],
       },
       {
         heading: "Common alert types",
@@ -169,7 +138,8 @@ export const trainingModules: TrainingModule[] = [
           "Click Acknowledge: the item moves to the Acknowledged list.",
         ],
         tip: "Click a driver name in an alert to jump straight to their record.",
-        warning: "Acknowledging records that you have seen the alert. It does not fix the underlying issue, so always follow up with the driver.",
+        warning:
+          "Acknowledging records that you have seen the alert. It does not fix the underlying issue, so always follow up with the driver.",
       },
     ],
   },
@@ -178,7 +148,7 @@ export const trainingModules: TrainingModule[] = [
     title: "Working with driver records",
     summary: "The five tabs of a driver record and the audit trail.",
     category: "Daily operations",
-    icon: FileText,
+    icon: "FileText",
     minutes: 5,
     sections: [
       {
@@ -207,7 +177,7 @@ export const trainingModules: TrainingModule[] = [
     title: "ELD and electronic logging basics",
     summary: "What an electronic logging device records and why it matters.",
     category: "ELD and hours of service",
-    icon: Activity,
+    icon: "Activity",
     minutes: 6,
     sections: [
       {
@@ -243,7 +213,7 @@ export const trainingModules: TrainingModule[] = [
     title: "Understanding hours-of-service clocks",
     summary: "The continuous, daily and weekly clocks and their statuses.",
     category: "ELD and hours of service",
-    icon: Clock,
+    icon: "Clock",
     minutes: 6,
     sections: [
       {
@@ -266,7 +236,8 @@ export const trainingModules: TrainingModule[] = [
       {
         heading: "Breaks and rest",
         body: "A qualifying break resets the continuous clock. A full daily rest resets the daily clock. The weekly clock rolls across the operating week.",
-        warning: "An Exceeded status means the driver is over a legal limit. Act promptly to reduce fatigue risk and avoid penalties.",
+        warning:
+          "An Exceeded status means the driver is over a legal limit. Act promptly to reduce fatigue risk and avoid penalties.",
         tip: "Limits come from your rule profile. Adjust them in Setup if your operating rules change.",
       },
     ],
@@ -276,7 +247,7 @@ export const trainingModules: TrainingModule[] = [
     title: "Configuring hours-of-service rule profiles",
     summary: "Setting the hours-of-service limits for your whole fleet.",
     category: "ELD and hours of service",
-    icon: SlidersHorizontal,
+    icon: "SlidersHorizontal",
     minutes: 5,
     sections: [
       {
@@ -301,7 +272,8 @@ export const trainingModules: TrainingModule[] = [
           "Edit the values you want to change.",
           "Click Save changes: the new limits apply across your fleet immediately.",
         ],
-        warning: "Rule changes affect every driver's clocks and alerts. Make sure new limits match your legal and contractual obligations before saving.",
+        warning:
+          "Rule changes affect every driver's clocks and alerts. Make sure new limits match your legal and contractual obligations before saving.",
       },
     ],
   },
@@ -310,7 +282,7 @@ export const trainingModules: TrainingModule[] = [
     title: "Certification and the Drivewise standard",
     summary: "Keeping your fleet certified and ahead of expiries.",
     category: "Compliance",
-    icon: BadgeCheck,
+    icon: "BadgeCheck",
     minutes: 4,
     sections: [
       {
@@ -341,7 +313,7 @@ export const trainingModules: TrainingModule[] = [
     title: "Cross-border corridor operations",
     summary: "Handling regional cross-border trips with confidence.",
     category: "Compliance",
-    icon: Globe,
+    icon: "Globe",
     minutes: 4,
     sections: [
       {
@@ -372,7 +344,7 @@ export const trainingModules: TrainingModule[] = [
     title: "Safety incidents and follow-up",
     summary: "Reviewing and responding to recorded safety incidents.",
     category: "Compliance",
-    icon: ShieldAlert,
+    icon: "ShieldAlert",
     minutes: 4,
     sections: [
       {
@@ -395,7 +367,3 @@ export const trainingModules: TrainingModule[] = [
     ],
   },
 ];
-
-export function getTrainingModule(slug: string): TrainingModule | undefined {
-  return trainingModules.find((m) => m.slug === slug);
-}

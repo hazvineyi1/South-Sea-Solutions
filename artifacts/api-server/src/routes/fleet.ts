@@ -19,7 +19,7 @@ async function ackKeysForOrg(orgId: string): Promise<Set<string>> {
 }
 
 router.get("/fleet/summary", requireAuth, requireRole("OWNER"), async (req, res): Promise<void> => {
-  const orgId = req.user!.orgId;
+  const orgId = req.auth!.orgId!;
   const ctx = await loadFleetContext(orgId);
   const ackKeys = await ackKeysForOrg(orgId);
   const alerts = buildAlerts(ctx, ackKeys);
@@ -30,7 +30,7 @@ router.get("/fleet/summary", requireAuth, requireRole("OWNER"), async (req, res)
 });
 
 router.get("/fleet/vehicles", requireAuth, requireRole("OWNER"), async (req, res): Promise<void> => {
-  const orgId = req.user!.orgId;
+  const orgId = req.auth!.orgId!;
   const ctx = await loadFleetContext(orgId);
   const ackKeys = await ackKeysForOrg(orgId);
   const alerts = buildAlerts(ctx, ackKeys);

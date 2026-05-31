@@ -6,8 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-function destinationFor(role: string): string {
-  if (role === "DRIVER") return "/portal/me";
+function destinationFor(user: { role: string; realRole: string; impersonating: boolean }): string {
+  if (user.realRole === "SUPERADMIN" && !user.impersonating) return "/console";
+  if (user.role === "DRIVER") return "/portal/me";
   return "/portal/command";
 }
 
@@ -21,7 +22,7 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (user) {
-      setLocation(destinationFor(user.role));
+      setLocation(destinationFor(user));
     }
   }, [user, setLocation]);
 

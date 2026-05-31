@@ -34,9 +34,11 @@ export const LoginResponse = zod.object({
   "name": zod.string(),
   "email": zod.string(),
   "role": zod.string(),
-  "orgId": zod.string(),
+  "realRole": zod.string(),
+  "orgId": zod.string().nullable(),
   "orgName": zod.string(),
-  "driverId": zod.string().nullish()
+  "driverId": zod.string().nullish(),
+  "impersonating": zod.boolean()
 })
 
 
@@ -48,9 +50,11 @@ export const GetMeResponse = zod.object({
   "name": zod.string(),
   "email": zod.string(),
   "role": zod.string(),
-  "orgId": zod.string(),
+  "realRole": zod.string(),
+  "orgId": zod.string().nullable(),
   "orgName": zod.string(),
-  "driverId": zod.string().nullish()
+  "driverId": zod.string().nullish(),
+  "impersonating": zod.boolean()
 })
 
 
@@ -172,7 +176,18 @@ export const GetDriverRecordResponse = zod.object({
   "status": zod.string(),
   "score": zod.number().nullish(),
   "completedOn": zod.string().nullish()
+})),
+  "trainingProgress": zod.object({
+  "completed": zod.number(),
+  "total": zod.number(),
+  "modules": zod.array(zod.object({
+  "slug": zod.string(),
+  "title": zod.string(),
+  "category": zod.string(),
+  "completed": zod.boolean(),
+  "completedAt": zod.string().nullish()
 }))
+}).optional()
 })
 
 
@@ -250,6 +265,424 @@ export const GetOrgProfileResponse = zod.object({
   "id": zod.string(),
   "name": zod.string(),
   "region": zod.string()
+})
+
+
+/**
+ * @summary List training modules with the current user's completion state
+ */
+export const GetTrainingModulesResponse = zod.object({
+  "completed": zod.number(),
+  "total": zod.number(),
+  "modules": zod.array(zod.object({
+  "id": zod.string(),
+  "slug": zod.string(),
+  "title": zod.string(),
+  "summary": zod.string(),
+  "category": zod.string(),
+  "icon": zod.string(),
+  "minutes": zod.number(),
+  "ordinal": zod.number(),
+  "completed": zod.boolean(),
+  "completedAt": zod.string().nullish()
+}))
+})
+
+
+/**
+ * @summary Get a single training module by slug
+ */
+export const GetTrainingModuleParams = zod.object({
+  "slug": zod.coerce.string()
+})
+
+export const GetTrainingModuleResponse = zod.object({
+  "id": zod.string(),
+  "slug": zod.string(),
+  "title": zod.string(),
+  "summary": zod.string(),
+  "category": zod.string(),
+  "icon": zod.string(),
+  "minutes": zod.number(),
+  "ordinal": zod.number(),
+  "sections": zod.array(zod.object({
+  "heading": zod.string(),
+  "body": zod.string().nullish(),
+  "steps": zod.array(zod.string()).optional(),
+  "bullets": zod.array(zod.string()).optional(),
+  "tip": zod.string().nullish(),
+  "warning": zod.string().nullish()
+})),
+  "completed": zod.boolean(),
+  "completedAt": zod.string().nullish()
+})
+
+
+/**
+ * @summary Mark a training module complete for the current user
+ */
+export const CompleteTrainingModuleParams = zod.object({
+  "id": zod.coerce.string()
+})
+
+
+/**
+ * @summary Clear a training module completion for the current user
+ */
+export const UncompleteTrainingModuleParams = zod.object({
+  "id": zod.coerce.string()
+})
+
+
+/**
+ * @summary Cross-org platform overview
+ */
+export const GetPlatformOverviewResponse = zod.object({
+  "totals": zod.object({
+  "orgs": zod.number(),
+  "users": zod.number(),
+  "drivers": zod.number(),
+  "vehicles": zod.number(),
+  "openAlerts": zod.number()
+}),
+  "orgs": zod.array(zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "region": zod.string(),
+  "active": zod.boolean(),
+  "users": zod.number(),
+  "drivers": zod.number(),
+  "vehicles": zod.number(),
+  "openAlerts": zod.number()
+}))
+})
+
+
+/**
+ * @summary List all organizations
+ */
+export const GetPlatformOrgsResponseItem = zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "region": zod.string(),
+  "active": zod.boolean(),
+  "createdAt": zod.string()
+})
+export const GetPlatformOrgsResponse = zod.array(GetPlatformOrgsResponseItem)
+
+
+/**
+ * @summary Create an organization
+ */
+
+
+
+
+export const CreatePlatformOrgBody = zod.object({
+  "name": zod.string().min(1),
+  "region": zod.string().min(1)
+})
+
+export const CreatePlatformOrgResponse = zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "region": zod.string(),
+  "active": zod.boolean(),
+  "createdAt": zod.string()
+})
+
+
+/**
+ * @summary Update an organization
+ */
+export const UpdatePlatformOrgParams = zod.object({
+  "id": zod.coerce.string()
+})
+
+
+
+
+
+export const UpdatePlatformOrgBody = zod.object({
+  "name": zod.string().min(1).optional(),
+  "region": zod.string().min(1).optional(),
+  "active": zod.boolean().optional()
+})
+
+export const UpdatePlatformOrgResponse = zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "region": zod.string(),
+  "active": zod.boolean(),
+  "createdAt": zod.string()
+})
+
+
+/**
+ * @summary Delete an organization and all its data
+ */
+export const DeletePlatformOrgParams = zod.object({
+  "id": zod.coerce.string()
+})
+
+
+/**
+ * @summary List users in an organization
+ */
+export const GetPlatformOrgUsersParams = zod.object({
+  "id": zod.coerce.string()
+})
+
+export const GetPlatformOrgUsersResponseItem = zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "email": zod.string(),
+  "role": zod.string(),
+  "active": zod.boolean(),
+  "driverId": zod.string().nullish(),
+  "createdAt": zod.string()
+})
+export const GetPlatformOrgUsersResponse = zod.array(GetPlatformOrgUsersResponseItem)
+
+
+/**
+ * @summary Create a user in an organization
+ */
+export const CreatePlatformOrgUserParams = zod.object({
+  "id": zod.coerce.string()
+})
+
+
+
+
+
+
+export const CreatePlatformOrgUserBody = zod.object({
+  "name": zod.string().min(1),
+  "email": zod.string().min(1),
+  "password": zod.string().min(1),
+  "role": zod.enum(['OWNER', 'DRIVER']),
+  "driverId": zod.string().nullish()
+})
+
+export const CreatePlatformOrgUserResponse = zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "email": zod.string(),
+  "role": zod.string(),
+  "active": zod.boolean(),
+  "driverId": zod.string().nullish(),
+  "createdAt": zod.string()
+})
+
+
+/**
+ * @summary Update a user (activate or deactivate)
+ */
+export const UpdatePlatformUserParams = zod.object({
+  "id": zod.coerce.string()
+})
+
+
+
+
+export const UpdatePlatformUserBody = zod.object({
+  "active": zod.boolean().optional(),
+  "role": zod.enum(['OWNER', 'DRIVER']).optional(),
+  "name": zod.string().min(1).optional()
+})
+
+export const UpdatePlatformUserResponse = zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "email": zod.string(),
+  "role": zod.string(),
+  "active": zod.boolean(),
+  "driverId": zod.string().nullish(),
+  "createdAt": zod.string()
+})
+
+
+/**
+ * @summary List all training modules for management
+ */
+export const GetPlatformTrainingModulesResponseItem = zod.object({
+  "id": zod.string(),
+  "slug": zod.string(),
+  "title": zod.string(),
+  "summary": zod.string(),
+  "category": zod.string(),
+  "icon": zod.string(),
+  "minutes": zod.number(),
+  "ordinal": zod.number(),
+  "sections": zod.array(zod.object({
+  "heading": zod.string(),
+  "body": zod.string().nullish(),
+  "steps": zod.array(zod.string()).optional(),
+  "bullets": zod.array(zod.string()).optional(),
+  "tip": zod.string().nullish(),
+  "warning": zod.string().nullish()
+})),
+  "completed": zod.boolean(),
+  "completedAt": zod.string().nullish()
+})
+export const GetPlatformTrainingModulesResponse = zod.array(GetPlatformTrainingModulesResponseItem)
+
+
+/**
+ * @summary Create a training module
+ */
+
+
+
+
+
+
+export const CreatePlatformTrainingModuleBody = zod.object({
+  "slug": zod.string().min(1),
+  "title": zod.string().min(1),
+  "summary": zod.string(),
+  "category": zod.string().min(1),
+  "icon": zod.string().min(1),
+  "minutes": zod.number(),
+  "ordinal": zod.number().optional(),
+  "sections": zod.array(zod.object({
+  "heading": zod.string(),
+  "body": zod.string().nullish(),
+  "steps": zod.array(zod.string()).optional(),
+  "bullets": zod.array(zod.string()).optional(),
+  "tip": zod.string().nullish(),
+  "warning": zod.string().nullish()
+}))
+})
+
+export const CreatePlatformTrainingModuleResponse = zod.object({
+  "id": zod.string(),
+  "slug": zod.string(),
+  "title": zod.string(),
+  "summary": zod.string(),
+  "category": zod.string(),
+  "icon": zod.string(),
+  "minutes": zod.number(),
+  "ordinal": zod.number(),
+  "sections": zod.array(zod.object({
+  "heading": zod.string(),
+  "body": zod.string().nullish(),
+  "steps": zod.array(zod.string()).optional(),
+  "bullets": zod.array(zod.string()).optional(),
+  "tip": zod.string().nullish(),
+  "warning": zod.string().nullish()
+})),
+  "completed": zod.boolean(),
+  "completedAt": zod.string().nullish()
+})
+
+
+/**
+ * @summary Update a training module
+ */
+export const UpdatePlatformTrainingModuleParams = zod.object({
+  "id": zod.coerce.string()
+})
+
+
+
+
+
+
+
+export const UpdatePlatformTrainingModuleBody = zod.object({
+  "slug": zod.string().min(1),
+  "title": zod.string().min(1),
+  "summary": zod.string(),
+  "category": zod.string().min(1),
+  "icon": zod.string().min(1),
+  "minutes": zod.number(),
+  "ordinal": zod.number().optional(),
+  "sections": zod.array(zod.object({
+  "heading": zod.string(),
+  "body": zod.string().nullish(),
+  "steps": zod.array(zod.string()).optional(),
+  "bullets": zod.array(zod.string()).optional(),
+  "tip": zod.string().nullish(),
+  "warning": zod.string().nullish()
+}))
+})
+
+export const UpdatePlatformTrainingModuleResponse = zod.object({
+  "id": zod.string(),
+  "slug": zod.string(),
+  "title": zod.string(),
+  "summary": zod.string(),
+  "category": zod.string(),
+  "icon": zod.string(),
+  "minutes": zod.number(),
+  "ordinal": zod.number(),
+  "sections": zod.array(zod.object({
+  "heading": zod.string(),
+  "body": zod.string().nullish(),
+  "steps": zod.array(zod.string()).optional(),
+  "bullets": zod.array(zod.string()).optional(),
+  "tip": zod.string().nullish(),
+  "warning": zod.string().nullish()
+})),
+  "completed": zod.boolean(),
+  "completedAt": zod.string().nullish()
+})
+
+
+/**
+ * @summary Delete a training module
+ */
+export const DeletePlatformTrainingModuleParams = zod.object({
+  "id": zod.coerce.string()
+})
+
+
+/**
+ * @summary Reorder training modules
+ */
+export const ReorderPlatformTrainingModulesBody = zod.object({
+  "ids": zod.array(zod.string())
+})
+
+
+/**
+ * @summary Begin impersonating an organization as owner
+ */
+
+
+
+export const EnterOrgBody = zod.object({
+  "orgId": zod.string().min(1)
+})
+
+export const EnterOrgResponse = zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "email": zod.string(),
+  "role": zod.string(),
+  "realRole": zod.string(),
+  "orgId": zod.string().nullable(),
+  "orgName": zod.string(),
+  "driverId": zod.string().nullish(),
+  "impersonating": zod.boolean()
+})
+
+
+/**
+ * @summary Stop impersonating and return to the platform console
+ */
+export const ExitOrgResponse = zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "email": zod.string(),
+  "role": zod.string(),
+  "realRole": zod.string(),
+  "orgId": zod.string().nullable(),
+  "orgName": zod.string(),
+  "driverId": zod.string().nullish(),
+  "impersonating": zod.boolean()
 })
 
 

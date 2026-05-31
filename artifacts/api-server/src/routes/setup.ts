@@ -16,7 +16,7 @@ function pickRule(rules: (typeof ruleProfilesTable.$inferSelect)[]) {
 }
 
 router.get("/setup/rule-profile", requireAuth, requireRole("OWNER"), async (req, res): Promise<void> => {
-  const rules = await db.select().from(ruleProfilesTable).where(eq(ruleProfilesTable.orgId, req.user!.orgId));
+  const rules = await db.select().from(ruleProfilesTable).where(eq(ruleProfilesTable.orgId, req.auth!.orgId!));
   const rule = pickRule(rules);
   if (!rule) {
     res.status(404).json({ error: "Rule profile not found" });
@@ -31,7 +31,7 @@ router.patch("/setup/rule-profile", requireAuth, requireRole("OWNER"), async (re
     res.status(400).json({ error: parsed.error.message });
     return;
   }
-  const rules = await db.select().from(ruleProfilesTable).where(eq(ruleProfilesTable.orgId, req.user!.orgId));
+  const rules = await db.select().from(ruleProfilesTable).where(eq(ruleProfilesTable.orgId, req.auth!.orgId!));
   const rule = pickRule(rules);
   if (!rule) {
     res.status(404).json({ error: "Rule profile not found" });
@@ -47,7 +47,7 @@ router.patch("/setup/rule-profile", requireAuth, requireRole("OWNER"), async (re
 });
 
 router.get("/setup/org", requireAuth, requireRole("OWNER"), async (req, res): Promise<void> => {
-  const [org] = await db.select().from(orgsTable).where(eq(orgsTable.id, req.user!.orgId));
+  const [org] = await db.select().from(orgsTable).where(eq(orgsTable.id, req.auth!.orgId!));
   if (!org) {
     res.status(404).json({ error: "Org not found" });
     return;

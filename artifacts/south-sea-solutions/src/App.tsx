@@ -3,7 +3,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/portal/auth";
-import { RequireAuth, PortalIndex } from "@/portal/guards";
+import { RequireAuth, RequireSuperadmin, PortalIndex } from "@/portal/guards";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
 import LoginPage from "@/pages/portal/login";
@@ -12,6 +12,10 @@ import TrainingPage from "@/pages/portal/training";
 import TrainingModulePage from "@/pages/portal/training-module";
 import DriverRecordPage from "@/pages/portal/driver-record";
 import DriverHomePage from "@/pages/portal/driver-home";
+import ConsoleOverviewPage from "@/pages/console/overview";
+import ConsoleOrgsPage from "@/pages/console/orgs";
+import ConsoleOrgDetailPage from "@/pages/console/org-detail";
+import ConsoleTrainingPage from "@/pages/console/training";
 
 const queryClient = new QueryClient();
 
@@ -27,12 +31,12 @@ function Router() {
         </RequireAuth>
       </Route>
       <Route path="/portal/training">
-        <RequireAuth roles={["OWNER"]}>
+        <RequireAuth>
           <TrainingPage />
         </RequireAuth>
       </Route>
       <Route path="/portal/training/:slug">
-        <RequireAuth roles={["OWNER"]}>
+        <RequireAuth>
           <TrainingModulePage />
         </RequireAuth>
       </Route>
@@ -45,6 +49,26 @@ function Router() {
         <RequireAuth>
           <DriverRecordPage />
         </RequireAuth>
+      </Route>
+      <Route path="/console">
+        <RequireSuperadmin>
+          <ConsoleOverviewPage />
+        </RequireSuperadmin>
+      </Route>
+      <Route path="/console/orgs">
+        <RequireSuperadmin>
+          <ConsoleOrgsPage />
+        </RequireSuperadmin>
+      </Route>
+      <Route path="/console/orgs/:id">
+        <RequireSuperadmin>
+          <ConsoleOrgDetailPage />
+        </RequireSuperadmin>
+      </Route>
+      <Route path="/console/training">
+        <RequireSuperadmin>
+          <ConsoleTrainingPage />
+        </RequireSuperadmin>
       </Route>
       <Route component={NotFound} />
     </Switch>

@@ -1,8 +1,58 @@
-import { pgTable, uuid, text, integer, date } from "drizzle-orm/pg-core";
+import { pgTable, uuid, text, integer, date, jsonb, timestamp, unique } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 import { orgsTable } from "./org";
 import { driversTable } from "./driver";
+import { usersTable } from "./auth";
+
+// A section of a training module's content. Stored as JSON so the superadmin can
+// author rich modules (steps, bullets, tips, warnings) without schema changes.
+export interface TrainingModuleSection {
+  heading: string;
+  body?: string | null;
+  steps?: string[];
+  bullets?: string[];
+  tip?: string | null;
+  warning?: string | null;
+}
+
+// Platform-wide training modules, managed by the superadmin and visible to every
+// logged-in user across all organizations.
+export const trainingModulesTable = pgTable("training_modules", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  slug: text("slug").notNull().unique(),
+  title: text("title").notNull(),
+  summary: text("summary").notNull(),
+  category: text("category").notNull(),
+  icon: text("icon").notNull().default("GraduationCap"),
+  minutes: integer("minutes").notNull().default(5),
+  ordinal: integer("ordinal").notNull().default(0),
+  sections: jsonb("sections").$type<TrainingModuleSection[]>().notNull().default([]),
+});
+
+export const insertTrainingModuleSchema = createInsertSchema(trainingModulesTable).omit({ id: true });
+export type InsertTrainingModule = z.infer<typeof insertTrainingModuleSchema>;
+export type TrainingModule = typeof trainingModulesTable.$inferSelect;
+
+// Per-user record that a given training module has been completed.
+export const trainingCompletionsTable = pgTable(
+  "training_completions",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => usersTable.id),
+    moduleId: uuid("module_id")
+      .notNull()
+      .references(() => trainingModulesTable.id),
+    completedAt: timestamp("completed_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [unique().on(t.userId, t.moduleId)],
+);
+
+export const insertTrainingCompletionSchema = createInsertSchema(trainingCompletionsTable).omit({ id: true });
+export type InsertTrainingCompletion = z.infer<typeof insertTrainingCompletionSchema>;
+export type TrainingCompletion = typeof trainingCompletionsTable.$inferSelect;
 
 export const coursesTable = pgTable("courses", {
   id: uuid("id").primaryKey().defaultRandom(),

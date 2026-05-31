@@ -1,7 +1,7 @@
 import { type ReactNode } from "react";
 import { Link, useLocation } from "wouter";
-import { LogOut, Compass, ArrowLeft, GraduationCap } from "lucide-react";
-import { useAuth, useLogout } from "./auth-hooks";
+import { LogOut, Compass, ArrowLeft, GraduationCap, Eye, LogOut as ExitIcon, Loader2 } from "lucide-react";
+import { useAuth, useLogout, useExitOrg } from "./auth-hooks";
 import { Button } from "@/components/ui/button";
 
 function initials(name: string): string {
@@ -17,6 +17,7 @@ function initials(name: string): string {
 export function PortalLayout({ children }: { children: ReactNode }) {
   const { user } = useAuth();
   const logout = useLogout();
+  const exitOrg = useExitOrg();
   const [, setLocation] = useLocation();
 
   function handleLogout() {
@@ -25,8 +26,31 @@ export function PortalLayout({ children }: { children: ReactNode }) {
     });
   }
 
+  function handleExitOrg() {
+    exitOrg.mutate(undefined, {
+      onSuccess: () => setLocation("/console"),
+    });
+  }
+
   return (
     <div className="drivewise min-h-screen bg-background font-sans text-foreground">
+      {user?.impersonating ? (
+        <div className="sticky top-0 z-30 flex flex-wrap items-center justify-center gap-2 bg-[#8a3a12] px-4 py-2 text-center text-sm text-white">
+          <Eye className="h-4 w-4" />
+          <span>
+            Viewing <span className="font-semibold">{user.orgName}</span> as superadmin.
+          </span>
+          <button
+            type="button"
+            onClick={handleExitOrg}
+            disabled={exitOrg.isPending}
+            className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 font-medium transition-colors hover:bg-white/25 disabled:opacity-60"
+          >
+            {exitOrg.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <ExitIcon className="h-3.5 w-3.5" />}
+            Exit to console
+          </button>
+        </div>
+      ) : null}
       <header className="sticky top-0 z-20 border-b bg-card/80 backdrop-blur">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
           <Link href="/portal" className="flex items-center gap-2.5">
@@ -41,15 +65,13 @@ export function PortalLayout({ children }: { children: ReactNode }) {
 
           {user ? (
             <div className="flex items-center gap-3">
-              {user.role === "OWNER" ? (
-                <Link
-                  href="/portal/training"
-                  className="hidden items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground sm:flex"
-                >
-                  <GraduationCap className="h-4 w-4" />
-                  Training
-                </Link>
-              ) : null}
+              <Link
+                href="/portal/training"
+                className="hidden items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground sm:flex"
+              >
+                <GraduationCap className="h-4 w-4" />
+                Training
+              </Link>
               <Link
                 href="/"
                 className="hidden items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground sm:flex"

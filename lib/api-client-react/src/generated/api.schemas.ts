@@ -25,10 +25,13 @@ export interface AuthUser {
   name: string;
   email: string;
   role: string;
-  orgId: string;
+  realRole: string;
+  /** @nullable */
+  orgId: string | null;
   orgName: string;
   /** @nullable */
   driverId?: string | null;
+  impersonating: boolean;
 }
 
 export interface FleetSummary {
@@ -132,6 +135,21 @@ export interface Telemetry {
   lastPingAt?: string | null;
 }
 
+export interface TrainingProgressItem {
+  slug: string;
+  title: string;
+  category: string;
+  completed: boolean;
+  /** @nullable */
+  completedAt?: string | null;
+}
+
+export interface TrainingProgress {
+  completed: number;
+  total: number;
+  modules: TrainingProgressItem[];
+}
+
 export interface DriverRecord {
   id: string;
   name: string;
@@ -162,6 +180,7 @@ export interface DriverRecord {
   incidents: IncidentItem[];
   documents: DocumentItem[];
   courses: CourseItem[];
+  trainingProgress?: TrainingProgress;
 }
 
 export interface Alert {
@@ -205,5 +224,169 @@ export interface OrgProfile {
   id: string;
   name: string;
   region: string;
+}
+
+export interface TrainingModuleSection {
+  heading: string;
+  /** @nullable */
+  body?: string | null;
+  steps?: string[];
+  bullets?: string[];
+  /** @nullable */
+  tip?: string | null;
+  /** @nullable */
+  warning?: string | null;
+}
+
+export interface TrainingModuleSummary {
+  id: string;
+  slug: string;
+  title: string;
+  summary: string;
+  category: string;
+  icon: string;
+  minutes: number;
+  ordinal: number;
+  completed: boolean;
+  /** @nullable */
+  completedAt?: string | null;
+}
+
+export interface TrainingModuleList {
+  completed: number;
+  total: number;
+  modules: TrainingModuleSummary[];
+}
+
+export interface TrainingModuleDetail {
+  id: string;
+  slug: string;
+  title: string;
+  summary: string;
+  category: string;
+  icon: string;
+  minutes: number;
+  ordinal: number;
+  sections: TrainingModuleSection[];
+  completed: boolean;
+  /** @nullable */
+  completedAt?: string | null;
+}
+
+export interface TrainingModuleInput {
+  /** @minLength 1 */
+  slug: string;
+  /** @minLength 1 */
+  title: string;
+  summary: string;
+  /** @minLength 1 */
+  category: string;
+  /** @minLength 1 */
+  icon: string;
+  minutes: number;
+  ordinal?: number;
+  sections: TrainingModuleSection[];
+}
+
+export interface TrainingReorderInput {
+  ids: string[];
+}
+
+export interface PlatformTotals {
+  orgs: number;
+  users: number;
+  drivers: number;
+  vehicles: number;
+  openAlerts: number;
+}
+
+export interface PlatformOrgStat {
+  id: string;
+  name: string;
+  region: string;
+  active: boolean;
+  users: number;
+  drivers: number;
+  vehicles: number;
+  openAlerts: number;
+}
+
+export interface PlatformOverview {
+  totals: PlatformTotals;
+  orgs: PlatformOrgStat[];
+}
+
+export interface PlatformOrg {
+  id: string;
+  name: string;
+  region: string;
+  active: boolean;
+  createdAt: string;
+}
+
+export interface PlatformOrgInput {
+  /** @minLength 1 */
+  name: string;
+  /** @minLength 1 */
+  region: string;
+}
+
+export interface PlatformOrgUpdate {
+  /** @minLength 1 */
+  name?: string;
+  /** @minLength 1 */
+  region?: string;
+  active?: boolean;
+}
+
+export interface PlatformUser {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  active: boolean;
+  /** @nullable */
+  driverId?: string | null;
+  createdAt: string;
+}
+
+export type PlatformUserInputRole = typeof PlatformUserInputRole[keyof typeof PlatformUserInputRole];
+
+
+export const PlatformUserInputRole = {
+  OWNER: 'OWNER',
+  DRIVER: 'DRIVER',
+} as const;
+
+export interface PlatformUserInput {
+  /** @minLength 1 */
+  name: string;
+  /** @minLength 1 */
+  email: string;
+  /** @minLength 1 */
+  password: string;
+  role: PlatformUserInputRole;
+  /** @nullable */
+  driverId?: string | null;
+}
+
+export type PlatformUserUpdateRole = typeof PlatformUserUpdateRole[keyof typeof PlatformUserUpdateRole];
+
+
+export const PlatformUserUpdateRole = {
+  OWNER: 'OWNER',
+  DRIVER: 'DRIVER',
+} as const;
+
+export interface PlatformUserUpdate {
+  active?: boolean;
+  role?: PlatformUserUpdateRole;
+  /** @minLength 1 */
+  name?: string;
+}
+
+export interface EnterOrgInput {
+  /** @minLength 1 */
+  orgId: string;
 }
 

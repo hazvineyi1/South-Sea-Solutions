@@ -11,6 +11,7 @@ import type { DocumentItem } from './documentItem';
 import type { HosClocks } from './hosClocks';
 import type { IncidentItem } from './incidentItem';
 import type { Telemetry } from './telemetry';
+import type { TrainingProgress } from './trainingProgress';
 
 export interface DriverRecord {
   id: string;
@@ -42,4 +43,5 @@ export interface DriverRecord {
   incidents: IncidentItem[];
   documents: DocumentItem[];
   courses: CourseItem[];
+  trainingProgress?: TrainingProgress;
 }

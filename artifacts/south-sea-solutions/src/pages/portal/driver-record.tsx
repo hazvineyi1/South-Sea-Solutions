@@ -10,6 +10,8 @@ import {
   FileText,
   AlertTriangle,
   Loader2,
+  CheckCircle2,
+  Circle,
 } from "lucide-react";
 import {
   useGetDriverRecord,
@@ -186,7 +188,39 @@ export function DriverRecordView({ record }: { record: DriverRecord }) {
           </div>
         </TabsContent>
 
-        <TabsContent value="training" className="mt-6">
+        <TabsContent value="training" className="mt-6 space-y-6">
+          {record.trainingProgress ? (
+            <div className="rounded-2xl border bg-card">
+              <div className="flex items-center justify-between border-b px-5 py-4">
+                <h3 className="font-display text-base font-semibold">Training center progress</h3>
+                <span className="text-sm font-medium text-muted-foreground">
+                  {record.trainingProgress.completed}/{record.trainingProgress.total} complete
+                </span>
+              </div>
+              <div className="divide-y">
+                {record.trainingProgress.modules.map((m) => (
+                  <div key={m.slug} className="flex items-center gap-3 px-5 py-4">
+                    {m.completed ? (
+                      <CheckCircle2 className="h-5 w-5 text-primary" />
+                    ) : (
+                      <Circle className="h-5 w-5 text-muted-foreground" />
+                    )}
+                    <div className="flex-1">
+                      <div className="text-sm font-medium">{m.title}</div>
+                      <div className="text-xs text-muted-foreground">
+                        {m.category}
+                        {m.completed && m.completedAt ? ` · completed ${m.completedAt.slice(0, 10)}` : ""}
+                      </div>
+                    </div>
+                    <StatusPill tone={m.completed ? "green" : "neutral"}>
+                      {m.completed ? "Done" : "Not started"}
+                    </StatusPill>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : null}
+
           <div className="rounded-2xl border bg-card">
             <div className="border-b px-5 py-4">
               <h3 className="font-display text-base font-semibold">Drivewise courses</h3>

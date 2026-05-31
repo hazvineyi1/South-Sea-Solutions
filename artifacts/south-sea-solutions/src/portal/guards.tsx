@@ -32,6 +32,21 @@ export function RequireAuth({
   return <>{children}</>;
 }
 
+export function RequireSuperadmin({ children }: { children: ReactNode }) {
+  const { user, isLoading } = useAuth();
+
+  if (isLoading) {
+    return <FullScreenLoader />;
+  }
+  if (!user) {
+    return <Redirect to="/login" />;
+  }
+  if (user.realRole !== "SUPERADMIN") {
+    return <Redirect to="/portal" />;
+  }
+  return <>{children}</>;
+}
+
 export function PortalIndex() {
   const { user, isLoading } = useAuth();
 
@@ -41,6 +56,11 @@ export function PortalIndex() {
   if (!user) {
     return <Redirect to="/login" />;
   }
-  const dest = user.role === "DRIVER" ? "/portal/me" : "/portal/command";
+  const dest =
+    user.realRole === "SUPERADMIN" && !user.impersonating
+      ? "/console"
+      : user.role === "DRIVER"
+        ? "/portal/me"
+        : "/portal/command";
   return <Redirect to={dest} />;
 }
