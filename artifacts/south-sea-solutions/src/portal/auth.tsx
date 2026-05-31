@@ -1,19 +1,6 @@
-import { createContext, useContext, type ReactNode } from "react";
-import { useQueryClient } from "@tanstack/react-query";
-import {
-  useGetMe,
-  getGetMeQueryKey,
-  useLogin as useLoginMutation,
-  useLogout as useLogoutMutation,
-  type AuthUser,
-} from "@workspace/api-client-react";
-
-type AuthContextValue = {
-  user: AuthUser | null;
-  isLoading: boolean;
-};
-
-const AuthContext = createContext<AuthContextValue | null>(null);
+import { type ReactNode } from "react";
+import { useGetMe, getGetMeQueryKey } from "@workspace/api-client-react";
+import { AuthContext } from "./auth-hooks";
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const { data, isLoading } = useGetMe({
@@ -25,35 +12,4 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       {children}
     </AuthContext.Provider>
   );
-}
-
-export function useAuth(): AuthContextValue {
-  const ctx = useContext(AuthContext);
-  if (!ctx) {
-    throw new Error("useAuth must be used within AuthProvider");
-  }
-  return ctx;
-}
-
-export function useLogin() {
-  const queryClient = useQueryClient();
-  return useLoginMutation({
-    mutation: {
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: getGetMeQueryKey() });
-      },
-    },
-  });
-}
-
-export function useLogout() {
-  const queryClient = useQueryClient();
-  return useLogoutMutation({
-    mutation: {
-      onSuccess: () => {
-        queryClient.setQueryData(getGetMeQueryKey(), null);
-        queryClient.clear();
-      },
-    },
-  });
 }

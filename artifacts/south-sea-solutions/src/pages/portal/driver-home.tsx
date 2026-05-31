@@ -1,6 +1,6 @@
 import { Loader2 } from "lucide-react";
 import { useGetDriverRecord, getGetDriverRecordQueryKey } from "@workspace/api-client-react";
-import { useAuth } from "@/portal/auth";
+import { useAuth } from "@/portal/auth-hooks";
 import { PortalLayout } from "@/portal/PortalLayout";
 import { DriverRecordView } from "./driver-record";
 

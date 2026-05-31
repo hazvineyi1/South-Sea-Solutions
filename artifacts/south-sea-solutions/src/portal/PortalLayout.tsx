@@ -1,7 +1,7 @@
 import { type ReactNode } from "react";
 import { Link, useLocation } from "wouter";
 import { LogOut, Compass } from "lucide-react";
-import { useAuth, useLogout } from "./auth";
+import { useAuth, useLogout } from "./auth-hooks";
 import { Button } from "@/components/ui/button";
 
 function initials(name: string): string {

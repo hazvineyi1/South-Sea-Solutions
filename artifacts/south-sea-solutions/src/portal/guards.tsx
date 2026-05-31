@@ -1,7 +1,7 @@
 import { type ReactNode } from "react";
 import { Redirect } from "wouter";
 import { Loader2 } from "lucide-react";
-import { useAuth } from "./auth";
+import { useAuth } from "./auth-hooks";
 
 function FullScreenLoader() {
   return (

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { Compass, Loader2 } from "lucide-react";
-import { useAuth, useLogin } from "@/portal/auth";
+import { useAuth, useLogin } from "@/portal/auth-hooks";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
