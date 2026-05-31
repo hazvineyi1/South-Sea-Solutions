@@ -318,9 +318,14 @@ router.patch("/platform/users/:id", ...guards, async (req, res): Promise<void> =
     res.status(400).json({ error: "Invalid request" });
     return;
   }
+  const { password, ...rest } = body.data;
+  const updates: Partial<typeof usersTable.$inferInsert> = { ...rest };
+  if (password !== undefined) {
+    updates.passwordHash = await hashPassword(password);
+  }
   const [user] = await db
     .update(usersTable)
-    .set(body.data)
+    .set(updates)
     .where(eq(usersTable.id, params.data.id))
     .returning();
   if (!user) {

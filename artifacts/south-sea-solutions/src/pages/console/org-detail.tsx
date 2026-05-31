@@ -92,9 +92,23 @@ function CreateUserForm({ orgId, onDone }: { orgId: string; onDone: () => void }
 
 function UserRow({ orgId, user }: { orgId: string; user: PlatformUser }) {
   const queryClient = useQueryClient();
+  const [resetting, setResetting] = useState(false);
+  const [newPassword, setNewPassword] = useState("");
+  const [resetDone, setResetDone] = useState(false);
+
   const update = useUpdatePlatformUser({
     mutation: {
       onSuccess: () => queryClient.invalidateQueries({ queryKey: getGetPlatformOrgUsersQueryKey(orgId) }),
+    },
+  });
+
+  const resetPassword = useUpdatePlatformUser({
+    mutation: {
+      onSuccess: () => {
+        setNewPassword("");
+        setResetting(false);
+        setResetDone(true);
+      },
     },
   });
 
@@ -107,30 +121,84 @@ function UserRow({ orgId, user }: { orgId: string; user: PlatformUser }) {
     update.mutate({ id: user.id, data: { role } });
   }
 
+  function submitReset(e: React.FormEvent) {
+    e.preventDefault();
+    if (!newPassword.trim()) return;
+    resetPassword.mutate({ id: user.id, data: { password: newPassword } });
+  }
+
+  function openReset() {
+    setResetDone(false);
+    setNewPassword("");
+    setResetting(true);
+  }
+
   return (
-    <div className="flex flex-wrap items-center gap-3 px-5 py-4">
-      <div className="min-w-0 flex-1">
-        <div className="flex items-center gap-2">
-          <span className="text-sm font-medium">{user.name}</span>
-          {user.active ? <StatusPill tone="green">Active</StatusPill> : <StatusPill tone="neutral">Disabled</StatusPill>}
+    <div className="px-5 py-4">
+      <div className="flex flex-wrap items-center gap-3">
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-medium">{user.name}</span>
+            {user.active ? (
+              <StatusPill tone="green">Active</StatusPill>
+            ) : (
+              <StatusPill tone="neutral">Disabled</StatusPill>
+            )}
+            {resetDone && <StatusPill tone="green">Password reset</StatusPill>}
+          </div>
+          <div className="text-xs text-muted-foreground">{user.email}</div>
         </div>
-        <div className="text-xs text-muted-foreground">{user.email}</div>
+        <select
+          value={user.role}
+          onChange={(e) => changeRole(e.target.value as PlatformUserInputRole)}
+          disabled={update.isPending}
+          className="h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm"
+        >
+          {ROLES.map((r) => (
+            <option key={r} value={r}>
+              {r}
+            </option>
+          ))}
+        </select>
+        <Button variant="outline" size="sm" onClick={openReset} disabled={resetting}>
+          Reset password
+        </Button>
+        <Button variant="outline" size="sm" onClick={toggleActive} disabled={update.isPending}>
+          {update.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : user.active ? "Disable" : "Enable"}
+        </Button>
       </div>
-      <select
-        value={user.role}
-        onChange={(e) => changeRole(e.target.value as PlatformUserInputRole)}
-        disabled={update.isPending}
-        className="h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm"
-      >
-        {ROLES.map((r) => (
-          <option key={r} value={r}>
-            {r}
-          </option>
-        ))}
-      </select>
-      <Button variant="outline" size="sm" onClick={toggleActive} disabled={update.isPending}>
-        {update.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : user.active ? "Disable" : "Enable"}
-      </Button>
+      {resetting && (
+        <form onSubmit={submitReset} className="mt-3 flex flex-wrap items-end gap-2 rounded-xl border bg-muted/40 p-3">
+          <div className="flex-1 space-y-1.5">
+            <Label htmlFor={`reset-${user.id}`}>New password for {user.name}</Label>
+            <Input
+              id={`reset-${user.id}`}
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              placeholder="Enter a new password"
+              autoFocus
+              required
+            />
+          </div>
+          <div className="flex gap-2">
+            <Button type="submit" size="sm" disabled={resetPassword.isPending || !newPassword.trim()} className="gap-1.5">
+              {resetPassword.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+              Set password
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                setResetting(false);
+                setNewPassword("");
+              }}
+            >
+              Cancel
+            </Button>
+          </div>
+        </form>
+      )}
     </div>
   );
 }

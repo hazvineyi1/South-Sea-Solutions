@@ -1181,6 +1181,9 @@ components:
         name:
           type: string
           minLength: 1
+        password:
+          type: string
+          minLength: 1
     EnterOrgInput:
       type: object
       required: [orgId]

@@ -387,6 +387,8 @@ export interface PlatformUserUpdate {
   role?: PlatformUserUpdateRole;
   /** @minLength 1 */
   name?: string;
+  /** @minLength 1 */
+  password?: string;
 }
 
 export interface EnterOrgInput {

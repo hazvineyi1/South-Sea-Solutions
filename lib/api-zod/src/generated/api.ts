@@ -488,10 +488,12 @@ export const UpdatePlatformUserParams = zod.object({
 
 
 
+
 export const UpdatePlatformUserBody = zod.object({
   "active": zod.boolean().optional(),
   "role": zod.enum(['OWNER', 'DRIVER']).optional(),
-  "name": zod.string().min(1).optional()
+  "name": zod.string().min(1).optional(),
+  "password": zod.string().min(1).optional()
 })
 
 export const UpdatePlatformUserResponse = zod.object({
