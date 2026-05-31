@@ -25,7 +25,7 @@ export function ConsoleLayout({ children }: { children: ReactNode }) {
   }
 
   return (
-    <div className="drivewise min-h-screen bg-background font-sans text-foreground">
+    <div className="aftrak min-h-screen bg-background font-sans text-foreground">
       <header className="sticky top-0 z-20 border-b bg-card/80 backdrop-blur">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
           <Link href="/console" className="flex items-center gap-2.5">
@@ -33,7 +33,7 @@ export function ConsoleLayout({ children }: { children: ReactNode }) {
               <ShieldCheck className="h-5 w-5" />
             </span>
             <span className="flex flex-col leading-tight">
-              <span className="font-display text-base font-bold tracking-tight">Drivewise console</span>
+              <span className="font-display text-base font-bold tracking-tight">Aftrak console</span>
               <span className="text-[11px] text-muted-foreground">Platform administration</span>
             </span>
           </Link>
@@ -47,6 +47,7 @@ export function ConsoleLayout({ children }: { children: ReactNode }) {
                 <BookOpen className="h-4 w-4" />
                 Training
               </Link>
+              <span className="mx-1 hidden h-5 w-px bg-border sm:block" aria-hidden="true" />
               <div className="hidden flex-col items-end leading-tight sm:flex">
                 <span className="text-sm font-medium">{user.name}</span>
                 <span className="text-[11px] uppercase tracking-wide text-muted-foreground">Superadmin</span>

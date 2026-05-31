@@ -59,7 +59,7 @@ export default function TrainingPage() {
         <div className="flex-1">
           <h1 className="font-display text-2xl font-bold tracking-tight">Training center</h1>
           <p className="text-sm text-muted-foreground">
-            Learn how to run the Drivewise ELD system, from daily operations to hours-of-service compliance.
+            Learn how to run the Aftrak ELD system, from daily operations to hours-of-service compliance.
           </p>
         </div>
         {data ? (

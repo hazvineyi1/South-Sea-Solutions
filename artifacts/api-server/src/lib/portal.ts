@@ -183,13 +183,13 @@ export function buildAlerts(ctx: FleetContext, ackKeys: Set<string>): AlertItem[
     const cert = ctx.certByDriver.get(driver.id);
     if (cert) {
       if (cert.status === "LAPSED") {
-        push({ key: `CERT_LAPSED:${driver.id}`, kind: "CERT_LAPSED", severity: "HIGH", driverId: driver.id, driverName: driver.name, message: "Drivewise certification has lapsed.", occurredAt: null });
+        push({ key: `CERT_LAPSED:${driver.id}`, kind: "CERT_LAPSED", severity: "HIGH", driverId: driver.id, driverName: driver.name, message: "Aftrak certification has lapsed.", occurredAt: null });
       } else {
         const state = dateState(cert.expiresOn);
         if (state === "EXPIRED") {
-          push({ key: `CERT_EXPIRED:${driver.id}`, kind: "CERT_EXPIRED", severity: "HIGH", driverId: driver.id, driverName: driver.name, message: "Drivewise certification has expired.", occurredAt: null });
+          push({ key: `CERT_EXPIRED:${driver.id}`, kind: "CERT_EXPIRED", severity: "HIGH", driverId: driver.id, driverName: driver.name, message: "Aftrak certification has expired.", occurredAt: null });
         } else if (state === "DUE_SOON") {
-          push({ key: `CERT_EXPIRING:${driver.id}`, kind: "CERT_EXPIRING", severity: "LOW", driverId: driver.id, driverName: driver.name, message: "Drivewise certification is due for renewal within 60 days.", occurredAt: null });
+          push({ key: `CERT_EXPIRING:${driver.id}`, kind: "CERT_EXPIRING", severity: "LOW", driverId: driver.id, driverName: driver.name, message: "Aftrak certification is due for renewal within 60 days.", occurredAt: null });
         }
       }
     }

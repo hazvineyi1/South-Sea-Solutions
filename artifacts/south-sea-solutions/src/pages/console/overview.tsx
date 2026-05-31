@@ -100,7 +100,7 @@ export default function ConsoleOverviewPage() {
       <div className="mb-6">
         <h1 className="font-display text-2xl font-bold tracking-tight">Platform overview</h1>
         <p className="text-sm text-muted-foreground">
-          Every organization on Drivewise, with live counts and one-click access.
+          Every organization on Aftrak, with live counts and one-click access.
         </p>
       </div>
 

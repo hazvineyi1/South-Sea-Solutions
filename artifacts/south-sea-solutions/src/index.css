@@ -161,9 +161,9 @@
   }
 }
 
-/* Drivewise portal theme: light cream and teal, scoped to portal routes only.
-   Overrides the dark oceanic marketing tokens within the .drivewise wrapper. */
-.drivewise {
+/* Aftrak portal theme: light cream and teal, scoped to portal routes only.
+   Overrides the dark oceanic marketing tokens within the .aftrak wrapper. */
+.aftrak {
   --app-font-sans: 'Inter', sans-serif;
   --radius: 1.125rem;
 

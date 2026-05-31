@@ -33,7 +33,7 @@ export function PortalLayout({ children }: { children: ReactNode }) {
   }
 
   return (
-    <div className="drivewise min-h-screen bg-background font-sans text-foreground">
+    <div className="aftrak min-h-screen bg-background font-sans text-foreground">
       {user?.impersonating ? (
         <div className="sticky top-0 z-30 flex flex-wrap items-center justify-center gap-2 bg-[#8a3a12] px-4 py-2 text-center text-sm text-white">
           <Eye className="h-4 w-4" />
@@ -58,7 +58,7 @@ export function PortalLayout({ children }: { children: ReactNode }) {
               <Compass className="h-5 w-5" />
             </span>
             <span className="flex flex-col leading-tight">
-              <span className="font-display text-base font-bold tracking-tight">Drivewise</span>
+              <span className="font-display text-base font-bold tracking-tight">Aftrak</span>
               <span className="text-[11px] text-muted-foreground">{user?.orgName}</span>
             </span>
           </Link>
@@ -79,6 +79,7 @@ export function PortalLayout({ children }: { children: ReactNode }) {
                 <ArrowLeft className="h-4 w-4" />
                 Back to site
               </Link>
+              <span className="mx-1 hidden h-5 w-px bg-border sm:block" aria-hidden="true" />
               <div className="hidden flex-col items-end leading-tight sm:flex">
                 <span className="text-sm font-medium">{user.name}</span>
                 <span className="text-[11px] uppercase tracking-wide text-muted-foreground">

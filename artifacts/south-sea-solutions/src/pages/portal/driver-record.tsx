@@ -223,7 +223,7 @@ export function DriverRecordView({ record }: { record: DriverRecord }) {
 
           <div className="rounded-2xl border bg-card">
             <div className="border-b px-5 py-4">
-              <h3 className="font-display text-base font-semibold">Drivewise courses</h3>
+              <h3 className="font-display text-base font-semibold">Aftrak courses</h3>
             </div>
             <div className="divide-y">
               {record.courses.map((c) => (

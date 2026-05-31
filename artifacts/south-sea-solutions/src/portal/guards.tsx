@@ -5,7 +5,7 @@ import { useAuth } from "./auth-hooks";
 
 function FullScreenLoader() {
   return (
-    <div className="drivewise flex min-h-screen items-center justify-center bg-background text-foreground">
+    <div className="aftrak flex min-h-screen items-center justify-center bg-background text-foreground">
       <Loader2 className="h-6 w-6 animate-spin text-primary" />
     </div>
   );

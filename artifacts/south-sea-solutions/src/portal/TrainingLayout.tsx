@@ -41,7 +41,7 @@ export function TrainingLayout({ children }: { children: ReactNode }) {
   const back = user ? backTarget(user) : null;
 
   return (
-    <div className="drivewise min-h-screen bg-background font-sans text-foreground">
+    <div className="aftrak min-h-screen bg-background font-sans text-foreground">
       <header className="sticky top-0 z-20 border-b bg-card/80 backdrop-blur">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
           <Link href="/training" className="flex items-center gap-2.5">
@@ -49,8 +49,8 @@ export function TrainingLayout({ children }: { children: ReactNode }) {
               <GraduationCap className="h-5 w-5" />
             </span>
             <span className="flex flex-col leading-tight">
-              <span className="font-display text-base font-bold tracking-tight">Training Center</span>
-              <span className="text-[11px] text-muted-foreground">South Sea Solutions</span>
+              <span className="font-display text-base font-bold tracking-tight">Aftrak</span>
+              <span className="text-[11px] text-muted-foreground">Training center</span>
             </span>
           </Link>
 

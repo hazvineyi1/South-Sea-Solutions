@@ -1,6 +1,6 @@
 # South Sea Solutions
 
-A login-gated, multi-tenant portal hub built on the South Sea Solutions marketing site. The first portal is Drivewise, a driver-risk and certification platform for commercial transport operators in Botswana. A platform-level SUPERADMIN console sits above the orgs for cross-org administration and impersonation.
+A login-gated, multi-tenant portal hub built on the South Sea Solutions marketing site. The first portal is Aftrak, a driver-risk and certification platform for commercial transport operators in Botswana. A platform-level SUPERADMIN console sits above the orgs for cross-org administration and impersonation.
 
 ## Run & Operate
 
@@ -10,7 +10,7 @@ A login-gated, multi-tenant portal hub built on the South Sea Solutions marketin
 - `pnpm run build` — typecheck + build all packages
 - `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
 - `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
-- `pnpm --filter @workspace/scripts run seed` — seed the Drivewise demo org, users, and drivers
+- `pnpm --filter @workspace/scripts run seed` — seed the Aftrak demo org, users, and drivers
 - Required env: `DATABASE_URL` (Postgres), `SESSION_SECRET` (cookie session signing)
 
 ## Stack
@@ -35,7 +35,7 @@ A login-gated, multi-tenant portal hub built on the South Sea Solutions marketin
 - Portal frontend: `artifacts/south-sea-solutions/src/portal/*` (auth context, guards, PortalLayout, ConsoleLayout, ui) and `src/pages/portal/*` (login, command, driver-record, driver-home)
 - Training center (DB-backed, all roles): `src/pages/portal/training.tsx` (index, category grouping, progress count), `training-module.tsx` (detail with sections/steps/callouts + mark complete/uncomplete), `trainingIcons.ts` (icon-name to Lucide map + `TRAINING_ICON_NAMES`). Routes `/portal/training` and `/portal/training/:slug`, guarded for any authenticated role; header "Training" link shown to all roles. Module content lives in the DB (`training_modules`), not a static file.
 - Superadmin console: `src/pages/console/*` (overview, orgs, org-detail, training, training-editor) under `/console*`, route-guarded by real SUPERADMIN role. Seed content: `scripts/src/trainingSeedData.ts`.
-- Drivewise theme: scoped `.drivewise` class in `src/index.css`
+- Aftrak theme: scoped `.aftrak` class in `src/index.css`
 
 ## Architecture decisions
 
@@ -51,7 +51,7 @@ A login-gated, multi-tenant portal hub built on the South Sea Solutions marketin
 - A console-created org has no drivers and no rule profile, so alert/HOS code must tolerate a missing rule: `ruleToInput(undefined)` falls back to a default HOS rule (otherwise the platform overview's open-alert count 500s).
 - Every successful driver-record read writes an `audit_logs` row.
 - Frontend and API share an origin via the reverse proxy, so the httpOnly session cookie flows automatically; the client uses relative `/api` URLs.
-- Drivewise design tokens (cream/teal, Sora/Inter) are scoped to portal routes via a `.drivewise` wrapper class, kept separate from the dark marketing theme.
+- Aftrak design tokens (cream/teal, Sora/Inter) are scoped to portal routes via a `.aftrak` wrapper class, kept separate from the dark marketing theme.
 
 ## Product
 

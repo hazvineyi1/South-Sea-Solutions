@@ -1,4 +1,4 @@
-// Drivewise fatigue and hours engine.
+// Aftrak fatigue and hours engine.
 //
 // IMPORTANT: the limits used here come from a configurable RuleProfile that
 // represents a contractual standard agreed with clients and insurers. They are

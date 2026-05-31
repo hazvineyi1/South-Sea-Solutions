@@ -1,9 +1,9 @@
 ---
-name: Drivewise portal multi-tenancy and access rules
-description: The non-negotiable security invariants for the Drivewise portal (owner/driver/superadmin).
+name: Aftrak portal multi-tenancy and access rules
+description: The non-negotiable security invariants for the Aftrak portal (owner/driver/superadmin).
 ---
 
-The Drivewise portal lives inside the South Sea Solutions app (Express API + React Vite),
+The Aftrak portal lives inside the South Sea Solutions app (Express API + React Vite),
 multi-tenant by `orgId`. These invariants must hold for every new endpoint and view.
 
 Roles: OWNER and DRIVER are org-scoped (have an `orgId`). SUPERADMIN is platform-level

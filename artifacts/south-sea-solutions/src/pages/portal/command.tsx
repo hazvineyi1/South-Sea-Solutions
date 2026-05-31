@@ -60,7 +60,7 @@ function TelemetryTab() {
         <Metric
           label="Fleet certified"
           value={`${summary?.fleetCertifiedPct ?? 0}%`}
-          hint="Drivewise standard"
+          hint="Aftrak standard"
           tone={(summary?.fleetCertifiedPct ?? 0) >= 80 ? "green" : "amber"}
         />
         <Metric

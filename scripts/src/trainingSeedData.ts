@@ -14,16 +14,16 @@ export interface TrainingSeedModule {
 // and mapped to components on the frontend.
 export const trainingSeedModules: TrainingSeedModule[] = [
   {
-    slug: "welcome-to-drivewise",
-    title: "Welcome to Drivewise",
+    slug: "welcome-to-aftrak",
+    title: "Welcome to Aftrak",
     summary: "What the platform does and how to find your way around it.",
     category: "Getting started",
     icon: "Compass",
     minutes: 4,
     sections: [
       {
-        heading: "What Drivewise is",
-        body: "Drivewise is a driver-risk and certification platform for commercial transport operators in Botswana. It turns electronic logging data from your vehicles into live telemetry, hours-of-service clocks, safety alerts and certification tracking, all in one portal.",
+        heading: "What Aftrak is",
+        body: "Aftrak is a driver-risk and certification platform for commercial transport operators in Botswana. It turns electronic logging data from your vehicles into live telemetry, hours-of-service clocks, safety alerts and certification tracking, all in one portal.",
       },
       {
         heading: "Signing in",
@@ -36,7 +36,7 @@ export const trainingSeedModules: TrainingSeedModule[] = [
       {
         heading: "Finding your way around",
         bullets: [
-          "The Drivewise logo (top left) returns you to your portal home.",
+          "The Aftrak logo (top left) returns you to your portal home.",
           "Training (top right) opens this learning center.",
           "Back to site (top right) returns you to the South Sea Solutions marketing site.",
           "Sign out ends your session securely.",
@@ -91,7 +91,7 @@ export const trainingSeedModules: TrainingSeedModule[] = [
       {
         heading: "Compliance metrics",
         bullets: [
-          "Fleet certified: the share of drivers meeting the Drivewise standard.",
+          "Fleet certified: the share of drivers meeting the Aftrak standard.",
           "Needs attention: drivers with an open item to review.",
           "Cross-border: vehicles currently on a cross-border corridor.",
           "Idling now: stationary vehicles reporting in.",
@@ -204,7 +204,7 @@ export const trainingSeedModules: TrainingSeedModule[] = [
       {
         heading: "Why it matters",
         body: "Reliable ELD data is the foundation of accurate hours-of-service tracking, fatigue prevention and audit-ready compliance records.",
-        tip: "Drivewise turns raw ELD pings into the clocks, alerts and telemetry you see throughout the portal.",
+        tip: "Aftrak turns raw ELD pings into the clocks, alerts and telemetry you see throughout the portal.",
       },
     ],
   },
@@ -279,7 +279,7 @@ export const trainingSeedModules: TrainingSeedModule[] = [
   },
   {
     slug: "certification",
-    title: "Certification and the Drivewise standard",
+    title: "Certification and the Aftrak standard",
     summary: "Keeping your fleet certified and ahead of expiries.",
     category: "Compliance",
     icon: "BadgeCheck",
@@ -288,14 +288,14 @@ export const trainingSeedModules: TrainingSeedModule[] = [
       {
         heading: "Certification statuses",
         bullets: [
-          "Certified: the driver meets the Drivewise standard.",
+          "Certified: the driver meets the Aftrak standard.",
           "In progress: working through required courses.",
           "Lapsed or expired: certification needs renewal.",
         ],
       },
       {
         heading: "Fleet certified percentage",
-        body: "This is the share of your drivers meeting the Drivewise standard. Keeping it high is a direct measure of fleet readiness.",
+        body: "This is the share of your drivers meeting the Aftrak standard. Keeping it high is a direct measure of fleet readiness.",
       },
       {
         heading: "Keeping drivers certified",
@@ -318,7 +318,7 @@ export const trainingSeedModules: TrainingSeedModule[] = [
     sections: [
       {
         heading: "What the flag means",
-        body: "When a vehicle is on a recognised cross-border corridor, Drivewise flags it so you can give the trip extra attention.",
+        body: "When a vehicle is on a recognised cross-border corridor, Aftrak flags it so you can give the trip extra attention.",
       },
       {
         heading: "Why it matters",
