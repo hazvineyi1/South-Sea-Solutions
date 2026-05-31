@@ -1,7 +1,64 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, CheckCircle2, Loader2 } from "lucide-react";
+import { useSubmitContactMessage } from "@workspace/api-client-react";
+
+type Errors = {
+  name?: string;
+  email?: string;
+  message?: string;
+};
+
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export function Contact() {
+  const [name, setName] = useState("");
+  const [organization, setOrganization] = useState("");
+  const [email, setEmail] = useState("");
+  const [message, setMessage] = useState("");
+  const [errors, setErrors] = useState<Errors>({});
+  const [sent, setSent] = useState(false);
+
+  const submit = useSubmitContactMessage({
+    mutation: {
+      onSuccess: () => {
+        setSent(true);
+        setName("");
+        setOrganization("");
+        setEmail("");
+        setMessage("");
+        setErrors({});
+      },
+    },
+  });
+
+  function validate(): Errors {
+    const next: Errors = {};
+    if (!name.trim()) next.name = "Please enter your name.";
+    if (!email.trim()) {
+      next.email = "Please enter your email.";
+    } else if (!EMAIL_PATTERN.test(email.trim())) {
+      next.email = "Please enter a valid email address.";
+    }
+    if (!message.trim()) next.message = "Please outline your requirements.";
+    return next;
+  }
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    const found = validate();
+    setErrors(found);
+    if (Object.keys(found).length > 0) return;
+    submit.mutate({
+      data: {
+        name: name.trim(),
+        organization: organization.trim() || undefined,
+        email: email.trim(),
+        message: message.trim(),
+      },
+    });
+  }
+
   return (
     <section id="contact" className="py-24 md:py-32">
       <div className="container mx-auto px-6">
@@ -31,43 +88,89 @@ export function Contact() {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="bg-secondary/30 p-8 md:p-12 border border-border"
           >
-            <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
-              <div>
-                <label className="block text-sm font-medium mb-2 text-muted-foreground">Name</label>
-                <input 
-                  type="text" 
-                  className="w-full bg-background border border-border px-4 py-3 focus:outline-none focus:border-primary transition-colors"
-                  placeholder="Your name"
-                />
+            {sent ? (
+              <div className="flex h-full flex-col items-center justify-center text-center py-12">
+                <CheckCircle2 className="w-12 h-12 text-primary mb-4" />
+                <h3 className="text-2xl font-semibold mb-2">Inquiry received.</h3>
+                <p className="text-muted-foreground max-w-sm">
+                  Thank you for reaching out. Our team will review your brief and respond shortly.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setSent(false)}
+                  className="mt-8 text-sm font-medium text-primary hover:underline"
+                >
+                  Send another inquiry
+                </button>
               </div>
-              <div>
-                <label className="block text-sm font-medium mb-2 text-muted-foreground">Organization</label>
-                <input 
-                  type="text" 
-                  className="w-full bg-background border border-border px-4 py-3 focus:outline-none focus:border-primary transition-colors"
-                  placeholder="Company name"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-2 text-muted-foreground">Email</label>
-                <input 
-                  type="email" 
-                  className="w-full bg-background border border-border px-4 py-3 focus:outline-none focus:border-primary transition-colors"
-                  placeholder="Email address"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-2 text-muted-foreground">Brief</label>
-                <textarea 
-                  className="w-full bg-background border border-border px-4 py-3 focus:outline-none focus:border-primary transition-colors h-32 resize-none"
-                  placeholder="Outline your requirements"
-                ></textarea>
-              </div>
-              <button className="w-full bg-primary text-primary-foreground px-6 py-4 font-medium flex items-center justify-center hover:bg-primary/90 transition-colors">
-                Submit Inquiry
-                <ArrowRight className="ml-2 w-4 h-4" />
-              </button>
-            </form>
+            ) : (
+              <form className="space-y-6" onSubmit={handleSubmit} noValidate>
+                <div>
+                  <label className="block text-sm font-medium mb-2 text-muted-foreground">Name</label>
+                  <input
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className="w-full bg-background border border-border px-4 py-3 focus:outline-none focus:border-primary transition-colors"
+                    placeholder="Your name"
+                  />
+                  {errors.name ? <p className="mt-1.5 text-sm text-destructive">{errors.name}</p> : null}
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2 text-muted-foreground">Organization</label>
+                  <input
+                    type="text"
+                    value={organization}
+                    onChange={(e) => setOrganization(e.target.value)}
+                    className="w-full bg-background border border-border px-4 py-3 focus:outline-none focus:border-primary transition-colors"
+                    placeholder="Company name"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2 text-muted-foreground">Email</label>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full bg-background border border-border px-4 py-3 focus:outline-none focus:border-primary transition-colors"
+                    placeholder="Email address"
+                  />
+                  {errors.email ? <p className="mt-1.5 text-sm text-destructive">{errors.email}</p> : null}
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2 text-muted-foreground">Brief</label>
+                  <textarea
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                    className="w-full bg-background border border-border px-4 py-3 focus:outline-none focus:border-primary transition-colors h-32 resize-none"
+                    placeholder="Outline your requirements"
+                  ></textarea>
+                  {errors.message ? <p className="mt-1.5 text-sm text-destructive">{errors.message}</p> : null}
+                </div>
+                {submit.isError ? (
+                  <p className="text-sm text-destructive">
+                    Something went wrong sending your inquiry. Please try again.
+                  </p>
+                ) : null}
+                <button
+                  type="submit"
+                  disabled={submit.isPending}
+                  className="w-full bg-primary text-primary-foreground px-6 py-4 font-medium flex items-center justify-center hover:bg-primary/90 transition-colors disabled:opacity-70"
+                >
+                  {submit.isPending ? (
+                    <>
+                      Sending
+                      <Loader2 className="ml-2 w-4 h-4 animate-spin" />
+                    </>
+                  ) : (
+                    <>
+                      Submit Inquiry
+                      <ArrowRight className="ml-2 w-4 h-4" />
+                    </>
+                  )}
+                </button>
+              </form>
+            )}
           </motion.div>
         </div>
       </div>

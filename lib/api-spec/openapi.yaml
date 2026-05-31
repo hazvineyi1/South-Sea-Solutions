@@ -547,6 +547,87 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/AuthUser"
+  /contact:
+    post:
+      operationId: submitContactMessage
+      tags: [contact]
+      summary: Submit a contact inquiry from the marketing site
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ContactMessageInput"
+      responses:
+        "200":
+          description: Received
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ContactMessageReceipt"
+        "400":
+          description: Invalid submission
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorMessage"
+  /platform/messages:
+    get:
+      operationId: getPlatformMessages
+      tags: [platform]
+      summary: List contact inquiries from the marketing site
+      responses:
+        "200":
+          description: Messages
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ContactMessage"
+  /platform/messages/{id}:
+    patch:
+      operationId: updatePlatformMessage
+      tags: [platform]
+      summary: Mark a contact inquiry read or unread
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PlatformMessageUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ContactMessage"
+        "404":
+          description: Message not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorMessage"
+    delete:
+      operationId: deletePlatformMessage
+      tags: [platform]
+      summary: Delete a contact inquiry
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Deleted
 components:
   schemas:
     HealthStatus:
@@ -562,6 +643,52 @@ components:
       properties:
         error:
           type: string
+    ContactMessageInput:
+      type: object
+      required: [name, email, message]
+      properties:
+        name:
+          type: string
+          minLength: 1
+        organization:
+          type: string
+        email:
+          type: string
+          minLength: 1
+          format: email
+        message:
+          type: string
+          minLength: 1
+    ContactMessageReceipt:
+      type: object
+      required: [ok]
+      properties:
+        ok:
+          type: boolean
+    ContactMessage:
+      type: object
+      required: [id, name, email, message, read, createdAt]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        organization:
+          type: ["string", "null"]
+        email:
+          type: string
+        message:
+          type: string
+        read:
+          type: boolean
+        createdAt:
+          type: string
+    PlatformMessageUpdate:
+      type: object
+      required: [read]
+      properties:
+        read:
+          type: boolean
     LoginInput:
       type: object
       required: [email, password]

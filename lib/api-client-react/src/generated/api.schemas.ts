@@ -13,6 +13,35 @@ export interface ApiErrorMessage {
   error: string;
 }
 
+export interface ContactMessageInput {
+  /** @minLength 1 */
+  name: string;
+  organization?: string;
+  /** @minLength 1 */
+  email: string;
+  /** @minLength 1 */
+  message: string;
+}
+
+export interface ContactMessageReceipt {
+  ok: boolean;
+}
+
+export interface ContactMessage {
+  id: string;
+  name: string;
+  /** @nullable */
+  organization?: string | null;
+  email: string;
+  message: string;
+  read: boolean;
+  createdAt: string;
+}
+
+export interface PlatformMessageUpdate {
+  read: boolean;
+}
+
 export interface LoginInput {
   /** @minLength 1 */
   email: string;

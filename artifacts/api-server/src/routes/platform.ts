@@ -22,6 +22,7 @@ import {
   alertAcksTable,
   trainingModulesTable,
   trainingCompletionsTable,
+  contactMessagesTable,
 } from "@workspace/db";
 import {
   GetPlatformOverviewResponse,
@@ -51,6 +52,11 @@ import {
   EnterOrgBody,
   EnterOrgResponse,
   ExitOrgResponse,
+  GetPlatformMessagesResponse,
+  UpdatePlatformMessageParams,
+  UpdatePlatformMessageBody,
+  UpdatePlatformMessageResponse,
+  DeletePlatformMessageParams,
 } from "@workspace/api-zod";
 import { requireAuth, requireSuperadmin, requireConsole } from "../middlewares/requireAuth";
 import { hashPassword, setActingOrg } from "../lib/auth";
@@ -457,6 +463,55 @@ router.post("/platform/training/reorder", ...consoleGuards, async (req, res): Pr
         .where(eq(trainingModulesTable.id, body.data.ids[i]));
     }
   });
+  res.sendStatus(204);
+});
+
+function contactMessageView(m: typeof contactMessagesTable.$inferSelect) {
+  return {
+    id: m.id,
+    name: m.name,
+    organization: m.organization,
+    email: m.email,
+    message: m.message,
+    read: m.read,
+    createdAt: m.createdAt.toISOString(),
+  };
+}
+
+router.get("/platform/messages", ...consoleGuards, async (_req, res): Promise<void> => {
+  const rows = await db
+    .select()
+    .from(contactMessagesTable)
+    .orderBy(desc(contactMessagesTable.createdAt));
+  res.json(GetPlatformMessagesResponse.parse(rows.map(contactMessageView)));
+});
+
+router.patch("/platform/messages/:id", ...consoleGuards, async (req, res): Promise<void> => {
+  const params = UpdatePlatformMessageParams.safeParse(req.params);
+  const body = UpdatePlatformMessageBody.safeParse(req.body);
+  if (!params.success || !body.success) {
+    res.status(400).json({ error: "Invalid request" });
+    return;
+  }
+  const [row] = await db
+    .update(contactMessagesTable)
+    .set({ read: body.data.read })
+    .where(eq(contactMessagesTable.id, params.data.id))
+    .returning();
+  if (!row) {
+    res.status(404).json({ error: "Message not found" });
+    return;
+  }
+  res.json(UpdatePlatformMessageResponse.parse(contactMessageView(row)));
+});
+
+router.delete("/platform/messages/:id", ...consoleGuards, async (req, res): Promise<void> => {
+  const params = DeletePlatformMessageParams.safeParse(req.params);
+  if (!params.success) {
+    res.status(400).json({ error: params.error.message });
+    return;
+  }
+  await db.delete(contactMessagesTable).where(eq(contactMessagesTable.id, params.data.id));
   res.sendStatus(204);
 });
 

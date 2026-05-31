@@ -8,3 +8,4 @@ export * from "./telemetry";
 export * from "./safety";
 export * from "./training";
 export * from "./audit";
+export * from "./contact";

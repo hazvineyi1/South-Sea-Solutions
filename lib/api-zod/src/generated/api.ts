@@ -690,3 +690,68 @@ export const ExitOrgResponse = zod.object({
 })
 
 
+/**
+ * @summary Submit a contact inquiry from the marketing site
+ */
+
+
+
+
+
+export const SubmitContactMessageBody = zod.object({
+  "name": zod.string().min(1),
+  "organization": zod.string().optional(),
+  "email": zod.string().email().min(1),
+  "message": zod.string().min(1)
+})
+
+export const SubmitContactMessageResponse = zod.object({
+  "ok": zod.boolean()
+})
+
+
+/**
+ * @summary List contact inquiries from the marketing site
+ */
+export const GetPlatformMessagesResponseItem = zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "organization": zod.string().nullish(),
+  "email": zod.string(),
+  "message": zod.string(),
+  "read": zod.boolean(),
+  "createdAt": zod.string()
+})
+export const GetPlatformMessagesResponse = zod.array(GetPlatformMessagesResponseItem)
+
+
+/**
+ * @summary Mark a contact inquiry read or unread
+ */
+export const UpdatePlatformMessageParams = zod.object({
+  "id": zod.coerce.string()
+})
+
+export const UpdatePlatformMessageBody = zod.object({
+  "read": zod.boolean()
+})
+
+export const UpdatePlatformMessageResponse = zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "organization": zod.string().nullish(),
+  "email": zod.string(),
+  "message": zod.string(),
+  "read": zod.boolean(),
+  "createdAt": zod.string()
+})
+
+
+/**
+ * @summary Delete a contact inquiry
+ */
+export const DeletePlatformMessageParams = zod.object({
+  "id": zod.coerce.string()
+})
+
+

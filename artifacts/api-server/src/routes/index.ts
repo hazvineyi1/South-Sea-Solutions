@@ -7,6 +7,7 @@ import alertsRouter from "./alerts";
 import setupRouter from "./setup";
 import trainingRouter from "./training";
 import platformRouter from "./platform";
+import contactRouter from "./contact";
 
 const router: IRouter = Router();
 
@@ -18,5 +19,6 @@ router.use(alertsRouter);
 router.use(setupRouter);
 router.use(trainingRouter);
 router.use(platformRouter);
+router.use(contactRouter);
 
 export default router;

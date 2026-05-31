@@ -24,12 +24,16 @@ import type {
   AlertAckInput,
   ApiErrorMessage,
   AuthUser,
+  ContactMessage,
+  ContactMessageInput,
+  ContactMessageReceipt,
   DriverRecord,
   EnterOrgInput,
   FleetSummary,
   HealthStatus,
   LoginInput,
   OrgProfile,
+  PlatformMessageUpdate,
   PlatformOrg,
   PlatformOrgInput,
   PlatformOrgUpdate,
@@ -2340,5 +2344,295 @@ export const useExitOrg = <TError = ErrorType<unknown>,
         TContext
       > => {
       return useMutation(getExitOrgMutationOptions(options));
+    }
+
+export const getSubmitContactMessageUrl = () => {
+
+
+
+
+  return `/api/contact`
+}
+
+/**
+ * @summary Submit a contact inquiry from the marketing site
+ */
+export const submitContactMessage = async (contactMessageInput: ContactMessageInput, options?: RequestInit): Promise<ContactMessageReceipt> => {
+
+  return customFetch<ContactMessageReceipt>(getSubmitContactMessageUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      contactMessageInput,)
+  }
+);}
+
+
+
+
+export const getSubmitContactMessageMutationOptions = <TError = ErrorType<ApiErrorMessage>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof submitContactMessage>>, TError,{data: BodyType<ContactMessageInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof submitContactMessage>>, TError,{data: BodyType<ContactMessageInput>}, TContext> => {
+
+const mutationKey = ['submitContactMessage'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof submitContactMessage>>, {data: BodyType<ContactMessageInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  submitContactMessage(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type SubmitContactMessageMutationResult = NonNullable<Awaited<ReturnType<typeof submitContactMessage>>>
+    export type SubmitContactMessageMutationBody = BodyType<ContactMessageInput>
+    export type SubmitContactMessageMutationError = ErrorType<ApiErrorMessage>
+
+    /**
+ * @summary Submit a contact inquiry from the marketing site
+ */
+export const useSubmitContactMessage = <TError = ErrorType<ApiErrorMessage>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof submitContactMessage>>, TError,{data: BodyType<ContactMessageInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof submitContactMessage>>,
+        TError,
+        {data: BodyType<ContactMessageInput>},
+        TContext
+      > => {
+      return useMutation(getSubmitContactMessageMutationOptions(options));
+    }
+
+export const getGetPlatformMessagesUrl = () => {
+
+
+
+
+  return `/api/platform/messages`
+}
+
+/**
+ * @summary List contact inquiries from the marketing site
+ */
+export const getPlatformMessages = async ( options?: RequestInit): Promise<ContactMessage[]> => {
+
+  return customFetch<ContactMessage[]>(getGetPlatformMessagesUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetPlatformMessagesQueryKey = () => {
+    return [
+    `/api/platform/messages`
+    ] as const;
+    }
+
+
+export const getGetPlatformMessagesQueryOptions = <TData = Awaited<ReturnType<typeof getPlatformMessages>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getPlatformMessages>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetPlatformMessagesQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getPlatformMessages>>> = ({ signal }) => getPlatformMessages({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getPlatformMessages>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetPlatformMessagesQueryResult = NonNullable<Awaited<ReturnType<typeof getPlatformMessages>>>
+export type GetPlatformMessagesQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary List contact inquiries from the marketing site
+ */
+
+export function useGetPlatformMessages<TData = Awaited<ReturnType<typeof getPlatformMessages>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getPlatformMessages>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetPlatformMessagesQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getUpdatePlatformMessageUrl = (id: string,) => {
+
+
+
+
+  return `/api/platform/messages/${id}`
+}
+
+/**
+ * @summary Mark a contact inquiry read or unread
+ */
+export const updatePlatformMessage = async (id: string,
+    platformMessageUpdate: PlatformMessageUpdate, options?: RequestInit): Promise<ContactMessage> => {
+
+  return customFetch<ContactMessage>(getUpdatePlatformMessageUrl(id),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      platformMessageUpdate,)
+  }
+);}
+
+
+
+
+export const getUpdatePlatformMessageMutationOptions = <TError = ErrorType<ApiErrorMessage>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updatePlatformMessage>>, TError,{id: string;data: BodyType<PlatformMessageUpdate>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updatePlatformMessage>>, TError,{id: string;data: BodyType<PlatformMessageUpdate>}, TContext> => {
+
+const mutationKey = ['updatePlatformMessage'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updatePlatformMessage>>, {id: string;data: BodyType<PlatformMessageUpdate>}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  updatePlatformMessage(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdatePlatformMessageMutationResult = NonNullable<Awaited<ReturnType<typeof updatePlatformMessage>>>
+    export type UpdatePlatformMessageMutationBody = BodyType<PlatformMessageUpdate>
+    export type UpdatePlatformMessageMutationError = ErrorType<ApiErrorMessage>
+
+    /**
+ * @summary Mark a contact inquiry read or unread
+ */
+export const useUpdatePlatformMessage = <TError = ErrorType<ApiErrorMessage>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updatePlatformMessage>>, TError,{id: string;data: BodyType<PlatformMessageUpdate>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updatePlatformMessage>>,
+        TError,
+        {id: string;data: BodyType<PlatformMessageUpdate>},
+        TContext
+      > => {
+      return useMutation(getUpdatePlatformMessageMutationOptions(options));
+    }
+
+export const getDeletePlatformMessageUrl = (id: string,) => {
+
+
+
+
+  return `/api/platform/messages/${id}`
+}
+
+/**
+ * @summary Delete a contact inquiry
+ */
+export const deletePlatformMessage = async (id: string, options?: RequestInit): Promise<void> => {
+
+  return customFetch<void>(getDeletePlatformMessageUrl(id),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+export const getDeletePlatformMessageMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deletePlatformMessage>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof deletePlatformMessage>>, TError,{id: string}, TContext> => {
+
+const mutationKey = ['deletePlatformMessage'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deletePlatformMessage>>, {id: string}> = (props) => {
+          const {id} = props ?? {};
+
+          return  deletePlatformMessage(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeletePlatformMessageMutationResult = NonNullable<Awaited<ReturnType<typeof deletePlatformMessage>>>
+
+    export type DeletePlatformMessageMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Delete a contact inquiry
+ */
+export const useDeletePlatformMessage = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deletePlatformMessage>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof deletePlatformMessage>>,
+        TError,
+        {id: string},
+        TContext
+      > => {
+      return useMutation(getDeletePlatformMessageMutationOptions(options));
     }
 
