@@ -1,0 +1,32 @@
+uploads = []
+outputs = []
+
+[[generated]]
+id = "juXSEkLltz3w78-XHOYLY"
+uri = "file://artifacts/south-sea-solutions/public/images/hero-abstract.png"
+type = "image"
+title = "Abstract deep ocean technology topography"
+
+[[generated]]
+id = "r_HA8cgRisEsLVedHn33a"
+uri = "file://artifacts/south-sea-solutions/public/images/drivewise.png"
+type = "image"
+title = "Drivewise logistics dashboard map"
+
+[[generated]]
+id = "R5RPoEWMJdQW6qEwlkLJU"
+uri = "file://artifacts/south-sea-solutions/public/images/logistics-port.png"
+type = "image"
+title = "Industrial logistics port at night"
+
+[[generated]]
+id = "pUCsR2Sv_4sJRSmMuQLwJ"
+uri = "file://artifacts/south-sea-solutions/public/images/mining-environment.png"
+type = "image"
+title = "Mining trucks operating in harsh environment"
+
+[[generated]]
+id = "VkYGbdwaJssAaJFFbVEjM"
+uri = "file://artifacts/south-sea-solutions/public/images/strategy-architecture.png"
+type = "image"
+title = "Abstract strategic architecture map"

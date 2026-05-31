@@ -1,0 +1,336 @@
+# Drivewise Replit Build Pack (v2)
+
+Prepared by South Sea Solutions.
+
+This is the complete development prompt set for building the production Drivewise platform on Replit. Paste the prompts into the Replit Agent in order, one at a time, and confirm each step works before moving to the next. Prompt 0 is the master context: paste it first, and re-paste it any time the Agent drifts off the rules.
+
+Style rule for every file the Agent produces: no em dashes anywhere. Use commas, periods, colons, parentheses, or a middot. This applies to UI copy, comments, and documentation.
+
+---
+
+## What Drivewise is (read before building)
+
+Drivewise is a driver-risk and certification platform for commercial road transport in Botswana, starting with the Gaborone and Francistown corridors. It is not an electronic logging device for legal compliance. Botswana has no statutory driving-hours limit, no ELD mandate, and no national demerit-point system. The forces that make operators buy are private: mines, large shippers, and cross-border clients that impose safety and fatigue requirements on the hauliers they contract, and insurers that price premiums on driver risk. Drivewise lets a haulier prove its drivers are safe and certified, win and keep those contracts, and reduce crash and fuel losses.
+
+There are two surfaces with two audiences:
+
+1. The driver app (phone-first, installable). The driver sets duty status, sees fatigue and hours clocks, builds a daily log, and certifies it. English and Setswana. This is the engagement wedge.
+2. The operator platform (web). The office sees a fleet view, alerts, and a per-driver record (overview, hours, safety, training and certification, documents). This is the oversight and sales tool.
+
+The data comes from the phone (location, speed, distance) and from driver self-report (fuel, odometer). There is no engine telematics hardware. Do not build engine telemetry.
+
+The recurring revenue and the moat is certification: a Drivewise Certified Driver credential with courses, scores, and annual validity, plus a fleet certified percentage that operators take into tenders and insurer reviews.
+
+---
+
+## Architecture
+
+- Framework: Next.js (App Router) with TypeScript.
+- Styling: Tailwind CSS. Design tokens below.
+- Database: PostgreSQL with Prisma ORM (Replit provides a Postgres add-on).
+- Auth: email and password with role-based access (Owner, Operator, Driver). Session via secure HTTP-only cookies.
+- Driver app: a Progressive Web App (installable, works on a low-end Android phone, tolerant of patchy signal, queues writes when offline and syncs when back online).
+- Internationalisation: English and Setswana only, with a simple key-based dictionary and English fallback.
+- Hosting and data residency: deploy in the closest available region and document it. Personal and certificate data are minimal by design under the Botswana Data Protection Act, 2024. Every read of a driver record writes to an audit log.
+
+Design tokens (use these so the build matches the prototype):
+
+```
+--bg #f3f0e8   --card #ffffff   --ink #1b2a27   --muted #5c6b66
+--prim #0f6e60 --prim2 #12876f  --primsoft #e3efe9
+--line #e8e3d8 --amber #c4861f  --red #bf463a    --green #2f9e74 --blue #2f8fdc
+Fonts: Sora (display, weights 600 to 800), Inter (body)
+Radius 18px, soft shadow, generous spacing, rounded pill chips.
+```
+
+---
+
+## Data model (target Prisma schema)
+
+The Agent will generate this in Prompt 2. It is included here so every later prompt can refer to it.
+
+```
+Org            id, name, region, createdAt
+User           id, orgId, email, passwordHash, role (OWNER|OPERATOR|DRIVER), name, locale, driverId?
+Fleet          id, orgId, name, depot
+Vehicle        id, fleetId, reg, active
+Driver         id, orgId, name, employeeNo, dob, phone, languages, homeDepot,
+               emergencyContact, licenceNo, licenceClass, prdp, currentVehicleId?,
+               safetyScore (int), onTimePct (int)
+RuleProfile    id, orgId, name, contMins, dailyMins, weeklyMins, dailyRestMins, breakMins, isDefault
+                 (defaults: cont 270, daily 540, weekly 3360, dailyRest 660, break 45)
+DutyEvent      id, driverId, status (OFF|REST|DRIVING|ONDUTY), startedAt, endedAt?, source (PHONE|MANUAL)
+DailyLog       id, driverId, date, driveMins, dutyMins, restMins, certifiedAt?, certified (bool)
+TripPing       id, driverId, vehicleId, lat, lng, speedKph, placeLabel, recordedAt   (from phone GPS)
+FuelReport     id, driverId, vehicleId, odometerKm, fuelPct, litres?, recordedAt      (driver entered)
+Incident       id, driverId, type, detail, severity (LOW|MEDIUM|HIGH), status (OPEN|RESOLVED),
+               riskPoints (int), occurredAt
+Document       id, driverId, type (LICENCE|PRDP|MEDICAL_CERT|DEFENSIVE_DRIVING|OTHER),
+               label, expiresOn                 (medical is a validity date only, no clinical data)
+Course         id, orgId, title, ordinal
+CourseCompletion id, driverId, courseId, status (DONE|IN_PROGRESS|TODO), score?, completedOn?
+Certification  id, driverId, status (CERTIFIED|IN_PROGRESS|LAPSED), issuedOn?, expiresOn?
+AuditLog       id, orgId, actorUserId, action, subjectType, subjectId, at
+```
+
+Derived values (compute, do not store): fleet certified percentage, needs-attention flags, fatigue and hours clock positions, document and certificate state (valid, due soon within 60 days, expired).
+
+---
+
+## Build prompts
+
+### Prompt 0: master context (paste first, pin it, re-paste on drift)
+
+```
+You are building Drivewise, a driver-risk and certification platform for commercial
+road transport in Botswana. Two surfaces: a phone-first PWA for drivers, and a web
+dashboard for operators. Stack: Next.js App Router, TypeScript, Tailwind, PostgreSQL
+with Prisma, cookie sessions, role-based access (Owner, Operator, Driver).
+
+Hard rules, do not violate:
+1. No em dashes anywhere, in code, comments, or UI copy. Use commas, periods,
+   parentheses, colons, or a middot.
+2. No engine telemetry. The only machine data is phone GPS (location, speed,
+   distance). Fuel and odometer are entered by the driver. Never add RPM, engine
+   temperature, oil, AdBlue, fault codes, satellites, or signal strength.
+3. Medical data is a certificate validity date only. Never store blood type,
+   conditions, vision, or any clinical detail.
+4. No demerit-point system. Use an internal safety score and an incident list, and
+   label them as internal risk indicators, not a legal licence status.
+5. Languages: English and Setswana only.
+6. Hours and fatigue limits are a configurable RuleProfile that satisfies client and
+   insurer requirements. State in the UI that this is a contractual standard, not
+   Botswana statute. Default limits: continuous 270 min, daily 540 min, weekly 3360
+   min, daily rest 660 min, break 45 min.
+7. Certification is a first-class feature: a Drivewise Certified Driver credential
+   with courses, scores, and annual validity, plus a fleet certified percentage.
+8. Personal and certificate data are minimal by design under the Botswana Data
+   Protection Act, 2024. Every read of a driver record writes to an AuditLog.
+
+Design tokens: background #f3f0e8, card #ffffff, ink #1b2a27, primary teal #0f6e60,
+amber #c4861f, red #bf463a, green #2f9e74, blue #2f8fdc. Fonts Sora (display) and
+Inter (body). Rounded cards (18px), soft shadows, pill chips, generous spacing.
+
+Build incrementally. After each step, confirm it runs and the acceptance criteria
+pass before continuing. Ask me before adding any feature not in the current step.
+```
+
+### Prompt 1: scaffold
+
+```
+Create a new Next.js App Router project in TypeScript with Tailwind configured.
+Set up the Sora and Inter fonts, the design tokens above as CSS variables in
+globals.css, and a base layout with the top bar (Drivewise logo, a Fleet and
+Drivers mode toggle placeholder, and an English/Setswana language select).
+Add Prisma and connect it to the Replit PostgreSQL database. Create a health-check
+page at / that confirms the database connection. Acceptance: the app runs, the
+font and colours match the tokens, and the health page shows a successful DB ping.
+```
+
+### Prompt 2: schema and seed
+
+```
+Implement the Prisma schema exactly as specified in the build pack (Org, User,
+Fleet, Vehicle, Driver, RuleProfile, DutyEvent, DailyLog, TripPing, FuelReport,
+Incident, Document, Course, CourseCompletion, Certification, AuditLog). Run the
+migration. Write a seed script that creates one Org, a default RuleProfile with the
+default limits, four Courses (Fatigue and hours management, Defensive and eco
+driving, Cross-border compliance, Dangerous goods awareness), and six demo drivers
+with vehicles, recent duty events, daily logs, trip pings, fuel reports, incidents,
+documents, course completions, and certification records that reproduce the
+prototype data (one lapsed certification, one in progress, four certified; one
+route deviation, one low fuel, one prolonged idle). Acceptance: the seed runs and
+the six drivers and their related records are queryable.
+```
+
+### Prompt 3: auth and roles
+
+```
+Add email and password authentication with secure HTTP-only cookie sessions and
+three roles: OWNER, OPERATOR, DRIVER. Owners and Operators reach the operator
+platform. Drivers reach only the driver app and only their own record. Add route
+guards and a server-side helper that returns the current user and role. A DRIVER
+user is linked to a Driver via User.driverId. Acceptance: an operator login lands
+on the fleet dashboard, a driver login lands on the driver app, and a driver cannot
+load another driver's data (verify with a direct URL attempt).
+```
+
+### Prompt 4: fatigue and hours engine, test first
+
+```
+Create a pure TypeScript module hosEngine.ts that, given a list of DutyEvents and a
+RuleProfile, returns: continuous driving minutes since the last qualifying break,
+daily driving minutes, weekly driving minutes, minutes remaining on each limit, and
+a status of OK, WARNING (at or above 90 percent of a limit), or EXCEEDED. A break
+qualifies when it is REST or OFF for at least RuleProfile.breakMins. Write the tests
+first using the cases in the build pack, then implement until they pass. The engine
+must be configurable by RuleProfile and must carry a code comment that these limits
+are a contractual standard, not Botswana statute. Acceptance: all listed test cases
+pass.
+```
+
+### Prompt 5: driver app (PWA)
+
+```
+Build the driver app as an installable PWA at /app. Screens: a status screen with
+four large duty buttons (Off, Rest, Driving, On duty) that write DutyEvents; live
+hours clocks (continuous, daily, weekly) driven by hosEngine.ts with teal, amber,
+red colour states; a simple 24-hour duty timeline for today; a fuel and odometer
+entry form that writes a FuelReport; and a certify action that closes the day into
+a DailyLog and sets certified. Capture phone GPS periodically and write TripPings
+(location label, speed) while the status is Driving. The app must work offline:
+queue writes locally and sync when back online. Fully bilingual English and
+Setswana, with Setswana honorifics Rra and Mma where a name is shown. Acceptance: a
+driver can change status, see clocks update, enter fuel, certify a day, and the app
+keeps working with the network off and syncs on reconnect.
+```
+
+### Prompt 6: operator shell, fleet view, alerts engine
+
+```
+Build the operator platform shell at /fleet with a Fleet and Drivers mode toggle.
+Fleet mode has three tabs: Fleet, Alerts, Setup. The Fleet tab shows a fleet status
+donut (moving versus idling derived from latest TripPing speed), KPI cards (active
+vehicles, cross-border count, needs attention count, fleet certified percentage), a
+needs-attention list, and a filterable vehicle list (all, on route, cross-border,
+needs attention). Each vehicle row shows status and certification pills, latest
+speed, and a driver-reported fuel bar, and opens the driver record on click.
+Implement an alerts engine that derives alerts from data: route deviation, fatigue
+watch (continuous near limit), low fuel (driver-reported at or below 15 percent),
+prolonged idle, certification lapsed, and document or certificate due soon or
+expired. Alerts are acknowledgeable. Setup shows the operator profile, the editable
+RuleProfile with the contractual-standard note, a certification value note, and the
+data and integrations note (phone-sourced data, in-region residency, Data
+Protection Act 2024). Acceptance: the fleet view renders from seed data, alerts
+generate and acknowledge, and tapping a vehicle opens that driver record.
+```
+
+### Prompt 7: driver record (operator view)
+
+```
+Build the driver record opened from the fleet view, with an operator-view banner
+that links to the driver app, and five tabs: Overview, Hours, Safety, Training,
+Documents. Overview: a safety-score gauge, certification status, a phone-sourced
+location and trip panel (location, speed, distance today, last seen, driver-reported
+fuel and odometer), and the profile and licence fields. Hours: the three hours
+clocks from hosEngine.ts, the interactive 24-hour duty timeline with a tap-for-range
+caption, a weekly driving chart, and a recent daily-logs table with certified,
+pending, and not-certified states. Safety: the safety score, a filterable incident
+list (all, open, resolved) with expand and a resolve and reopen toggle, and a note
+that this is an internal risk index, not a legal licence status. Every time an
+operator opens a driver record, write an AuditLog entry. Acceptance: all five tabs
+render, the timeline and chart are interactive, incidents resolve and reopen, and an
+audit entry is written on each record open.
+```
+
+### Prompt 8: certification module (the core)
+
+```
+Build the Training tab and the certification logic. The Training tab shows a
+Drivewise Certified Driver credential card with status (Certified, In progress,
+Lapsed) and validity date, and the per-course list with status and score. Implement
+the rule that a driver is Certified when all required courses are DONE and the
+certification has not expired, In progress when some courses are incomplete, and
+Lapsed when the certification expiry date has passed. Recertification is annual.
+Compute the fleet certified percentage from these records and surface it on the
+Fleet tab and in Setup. Add an operator action to record a course completion and
+score, which recomputes certification status. Acceptance: completing the last
+outstanding course flips a driver to Certified, an expired certification shows
+Lapsed, and the fleet certified percentage updates accordingly.
+```
+
+### Prompt 9: documents and expiry
+
+```
+Build the Documents tab: licence, PrDP, medical certificate, and defensive driving,
+each with an expiry date, a state pill (valid, due soon within 60 days, expired),
+and a days-remaining or days-overdue count computed against the current date. The
+medical certificate is a validity date only, with a visible note that no clinical
+data is stored, in line with the Data Protection Act 2024. Wire document and
+certificate expiry into the alerts engine from Prompt 6. Acceptance: states and
+counts are correct relative to today, and expiring or expired documents appear as
+alerts on the Fleet Alerts tab.
+```
+
+### Prompt 10: internationalisation (English and Setswana)
+
+```
+Add a key-based i18n system with English and Setswana dictionaries and an English
+fallback, covering all driver app and operator UI strings. The language select in
+the top bar switches the active locale and persists the choice. Do not add any other
+languages. Acceptance: switching to Setswana translates the navigation, labels, and
+core copy across both surfaces, and any missing key falls back to English cleanly.
+```
+
+### Prompt 11: data protection and audit enforcement
+
+```
+Harden the data-protection posture. Confirm medical and personal data are minimal
+(no clinical fields exist anywhere). Ensure every read of a driver record by an
+operator writes an AuditLog entry, and add an audit view for Owners that lists who
+accessed which driver record and when. Enforce that Drivers can read and write only
+their own data, and that Operators are scoped to their Org. Add a short in-app
+privacy note describing what is collected (phone location and trip, driver-entered
+fuel and odometer, certificate validity dates) and the in-region storage and audit
+logging. Acceptance: a driver cannot reach another driver's data by any route, the
+audit view lists record accesses, and the privacy note is reachable from both
+surfaces.
+```
+
+### Prompt 12: deploy
+
+```
+Prepare for deployment on Replit. Set the database URL and a session secret as
+environment variables, run prisma migrate deploy, build the production bundle, and
+deploy. Record the deployment region in the Setup data note so data residency is
+documented. Provide a short runbook: how to add a driver, link a driver login,
+record a course completion, and edit the RuleProfile. Acceptance: the deployed URL
+loads, an operator and a driver can both log in, and the runbook steps work end to
+end.
+```
+
+---
+
+## Fatigue and hours engine test cases (for Prompt 4)
+
+Defaults: continuous 270, daily 540, weekly 3360, daily rest 660, break 45 (minutes).
+
+1. No driving today returns continuous 0, daily 0, status OK.
+2. 240 minutes continuous driving with no qualifying break returns WARNING (at or above 90 percent of 270).
+3. 270 minutes continuous driving returns EXCEEDED on the continuous limit.
+4. 200 minutes driving, then a 45 minute REST, then 60 minutes driving returns continuous 60, not 260 (the break reset the continuous count).
+5. 200 minutes driving, then a 30 minute REST, then 60 minutes driving returns continuous 260 (the break was shorter than 45 minutes and did not qualify).
+6. Daily driving of 486 minutes returns WARNING (at or above 90 percent of 540).
+7. Daily driving of 540 minutes returns EXCEEDED on the daily limit.
+8. Weekly driving of 3360 minutes returns EXCEEDED on the weekly limit, even if the daily and continuous counts are OK.
+
+Each result must include minutes remaining on every limit, and the overall status is the most severe of the three limit statuses.
+
+---
+
+## What NOT to build (the fat we already cut)
+
+- No engine telemetry of any kind (RPM, engine temperature, oil pressure, AdBlue, fault codes, satellites, signal strength). Phone GPS and driver input only.
+- No clinical medical fields. Medical is a certificate validity date.
+- No demerit-point system or any framing of points as a legal licence status.
+- No languages beyond English and Setswana.
+- No decorative map until there is real GPS to plot. If a map is added later, it must plot actual TripPings.
+- No claim, anywhere in copy, that Drivewise satisfies a Botswana legal driving-hours or ELD requirement. The standard is contractual.
+
+---
+
+## Acceptance criteria for the whole build
+
+- A driver installs the app, sets status, sees live clocks, enters fuel, and certifies a day, including offline then syncing.
+- An operator sees the fleet view, acts on alerts, and opens any driver record across Overview, Hours, Safety, Training, and Documents.
+- Completing courses moves a driver to Certified and updates the fleet certified percentage.
+- Document and certificate expiries drive alerts.
+- Every driver-record access is audit-logged, and drivers cannot reach each other's data.
+- English and Setswana both work with clean fallback.
+- No em dashes anywhere. No engine telemetry. No clinical medical data. No demerit system.
+
+---
+
+## Notes on scope and sequencing
+
+Prompts 1 through 5 deliver a usable driver app and a working hours engine, which is the engagement wedge and the part a pilot fleet touches first. Prompts 6 through 9 deliver the operator value and the certification core that you sell to mines, shippers, and insurers. Prompts 10 through 12 make it shippable. If you need a demo before a full build, stop after Prompt 8 and you will have the full story end to end.
