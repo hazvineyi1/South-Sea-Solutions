@@ -75,8 +75,10 @@ export function requireRole(...roles: string[]) {
   };
 }
 
-// Guards platform endpoints by the real platform identity, so impersonation does
-// not change who may manage the platform.
+// Guards the impersonation controls (enter-org / exit-org) by the real platform
+// identity, so impersonation does not change who may drive impersonation. This
+// is deliberately reachable WHILE impersonating, so an acting superadmin can
+// always exit back out.
 export function requireSuperadmin(req: Request, res: Response, next: NextFunction): void {
   if (!req.auth) {
     res.status(401).json({ error: "Not authenticated" });
@@ -84,6 +86,28 @@ export function requireSuperadmin(req: Request, res: Response, next: NextFunctio
   }
   if (req.auth.realRole !== "SUPERADMIN") {
     res.status(403).json({ error: "Forbidden" });
+    return;
+  }
+  next();
+}
+
+// Guards the cross-org platform console. The console is reachable only by a real
+// SUPERADMIN who is NOT currently impersonating an org: while acting inside an
+// org a superadmin must exit (via exit-org) before using cross-org console
+// tools. This blocks the impersonated org's effective OWNER role from ever being
+// the thing that unlocks the console, and mirrors the UI, which only exposes the
+// console after "Exit to console".
+export function requireConsole(req: Request, res: Response, next: NextFunction): void {
+  if (!req.auth) {
+    res.status(401).json({ error: "Not authenticated" });
+    return;
+  }
+  if (req.auth.realRole !== "SUPERADMIN") {
+    res.status(403).json({ error: "Forbidden" });
+    return;
+  }
+  if (req.auth.impersonating) {
+    res.status(403).json({ error: "Exit the org to use the console" });
     return;
   }
   next();

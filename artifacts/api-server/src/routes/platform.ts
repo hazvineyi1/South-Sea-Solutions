@@ -52,12 +52,16 @@ import {
   EnterOrgResponse,
   ExitOrgResponse,
 } from "@workspace/api-zod";
-import { requireAuth, requireSuperadmin } from "../middlewares/requireAuth";
+import { requireAuth, requireSuperadmin, requireConsole } from "../middlewares/requireAuth";
 import { hashPassword, setActingOrg } from "../lib/auth";
 import { loadFleetContext, buildAlerts } from "../lib/portal";
 
 const router: IRouter = Router();
 
+// Console management endpoints require a real superadmin who is NOT impersonating.
+const consoleGuards = [requireAuth, requireConsole] as const;
+// Impersonation controls (enter / exit) must stay reachable while impersonating,
+// so they only require the real superadmin identity.
 const guards = [requireAuth, requireSuperadmin] as const;
 
 async function openAlertCountForOrg(orgId: string): Promise<number> {
@@ -73,7 +77,7 @@ function completionPercent(completed: number, possible: number): number {
   return Math.round((completed / possible) * 100);
 }
 
-router.get("/platform/overview", ...guards, async (_req, res): Promise<void> => {
+router.get("/platform/overview", ...consoleGuards, async (_req, res): Promise<void> => {
   const orgs = await db.select().from(orgsTable).orderBy(asc(orgsTable.name));
 
   // Training modules are global, so the count is shared across every org.
@@ -135,7 +139,7 @@ router.get("/platform/overview", ...guards, async (_req, res): Promise<void> => 
   res.json(GetPlatformOverviewResponse.parse({ totals, orgs: perOrg }));
 });
 
-router.get("/platform/orgs", ...guards, async (_req, res): Promise<void> => {
+router.get("/platform/orgs", ...consoleGuards, async (_req, res): Promise<void> => {
   const orgs = await db.select().from(orgsTable).orderBy(asc(orgsTable.name));
   res.json(
     GetPlatformOrgsResponse.parse(
@@ -150,7 +154,7 @@ router.get("/platform/orgs", ...guards, async (_req, res): Promise<void> => {
   );
 });
 
-router.post("/platform/orgs", ...guards, async (req, res): Promise<void> => {
+router.post("/platform/orgs", ...consoleGuards, async (req, res): Promise<void> => {
   const parsed = CreatePlatformOrgBody.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ error: parsed.error.message });
@@ -168,7 +172,7 @@ router.post("/platform/orgs", ...guards, async (req, res): Promise<void> => {
   );
 });
 
-router.patch("/platform/orgs/:id", ...guards, async (req, res): Promise<void> => {
+router.patch("/platform/orgs/:id", ...consoleGuards, async (req, res): Promise<void> => {
   const params = UpdatePlatformOrgParams.safeParse(req.params);
   const body = UpdatePlatformOrgBody.safeParse(req.body);
   if (!params.success || !body.success) {
@@ -195,7 +199,7 @@ router.patch("/platform/orgs/:id", ...guards, async (req, res): Promise<void> =>
   );
 });
 
-router.delete("/platform/orgs/:id", ...guards, async (req, res): Promise<void> => {
+router.delete("/platform/orgs/:id", ...consoleGuards, async (req, res): Promise<void> => {
   const params = DeletePlatformOrgParams.safeParse(req.params);
   if (!params.success) {
     res.status(400).json({ error: params.error.message });
@@ -248,7 +252,7 @@ router.delete("/platform/orgs/:id", ...guards, async (req, res): Promise<void> =
   res.sendStatus(204);
 });
 
-router.get("/platform/orgs/:id/users", ...guards, async (req, res): Promise<void> => {
+router.get("/platform/orgs/:id/users", ...consoleGuards, async (req, res): Promise<void> => {
   const params = GetPlatformOrgUsersParams.safeParse(req.params);
   if (!params.success) {
     res.status(400).json({ error: params.error.message });
@@ -274,7 +278,7 @@ router.get("/platform/orgs/:id/users", ...guards, async (req, res): Promise<void
   );
 });
 
-router.post("/platform/orgs/:id/users", ...guards, async (req, res): Promise<void> => {
+router.post("/platform/orgs/:id/users", ...consoleGuards, async (req, res): Promise<void> => {
   const params = CreatePlatformOrgUserParams.safeParse(req.params);
   const body = CreatePlatformOrgUserBody.safeParse(req.body);
   if (!params.success || !body.success) {
@@ -311,7 +315,7 @@ router.post("/platform/orgs/:id/users", ...guards, async (req, res): Promise<voi
   );
 });
 
-router.patch("/platform/users/:id", ...guards, async (req, res): Promise<void> => {
+router.patch("/platform/users/:id", ...consoleGuards, async (req, res): Promise<void> => {
   const params = UpdatePlatformUserParams.safeParse(req.params);
   const body = UpdatePlatformUserBody.safeParse(req.body);
   if (!params.success || !body.success) {
@@ -361,7 +365,7 @@ function moduleDetail(m: typeof trainingModulesTable.$inferSelect) {
   };
 }
 
-router.get("/platform/training/modules", ...guards, async (_req, res): Promise<void> => {
+router.get("/platform/training/modules", ...consoleGuards, async (_req, res): Promise<void> => {
   const modules = await db
     .select()
     .from(trainingModulesTable)
@@ -369,7 +373,7 @@ router.get("/platform/training/modules", ...guards, async (_req, res): Promise<v
   res.json(GetPlatformTrainingModulesResponse.parse(modules.map(moduleDetail)));
 });
 
-router.post("/platform/training/modules", ...guards, async (req, res): Promise<void> => {
+router.post("/platform/training/modules", ...consoleGuards, async (req, res): Promise<void> => {
   const body = CreatePlatformTrainingModuleBody.safeParse(req.body);
   if (!body.success) {
     res.status(400).json({ error: body.error.message });
@@ -396,7 +400,7 @@ router.post("/platform/training/modules", ...guards, async (req, res): Promise<v
   res.json(CreatePlatformTrainingModuleResponse.parse(moduleDetail(module)));
 });
 
-router.patch("/platform/training/modules/:id", ...guards, async (req, res): Promise<void> => {
+router.patch("/platform/training/modules/:id", ...consoleGuards, async (req, res): Promise<void> => {
   const params = UpdatePlatformTrainingModuleParams.safeParse(req.params);
   const body = UpdatePlatformTrainingModuleBody.safeParse(req.body);
   if (!params.success || !body.success) {
@@ -424,7 +428,7 @@ router.patch("/platform/training/modules/:id", ...guards, async (req, res): Prom
   res.json(UpdatePlatformTrainingModuleResponse.parse(moduleDetail(module)));
 });
 
-router.delete("/platform/training/modules/:id", ...guards, async (req, res): Promise<void> => {
+router.delete("/platform/training/modules/:id", ...consoleGuards, async (req, res): Promise<void> => {
   const params = DeletePlatformTrainingModuleParams.safeParse(req.params);
   if (!params.success) {
     res.status(400).json({ error: params.error.message });
@@ -439,7 +443,7 @@ router.delete("/platform/training/modules/:id", ...guards, async (req, res): Pro
   res.sendStatus(204);
 });
 
-router.post("/platform/training/reorder", ...guards, async (req, res): Promise<void> => {
+router.post("/platform/training/reorder", ...consoleGuards, async (req, res): Promise<void> => {
   const body = ReorderPlatformTrainingModulesBody.safeParse(req.body);
   if (!body.success) {
     res.status(400).json({ error: body.error.message });

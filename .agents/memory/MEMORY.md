@@ -2,3 +2,5 @@
 - [Portal multi-tenancy rules](portal-tenancy.md) — every read scoped by orgId; operator-only endpoints (incl. read-only setup) need requireRole; driver reads write audit log.
 - [Role-based data redaction](role-data-redaction.md) — fields a role must not see (e.g. operator vs owner telemetry) must be stripped server-side by role, not just hidden in the UI.
 - [Default content needs a startup bootstrap](seed-vs-startup-bootstrap.md) — dev-only seed leaves prod empty; load default DB content via idempotent insert-if-missing at server startup, awaited before listen.
+- [Stale lib .d.ts typecheck errors](stale-lib-dts-typecheck.md) — leaf typecheck reads libs' emitted dist .d.ts; after codegen run `typecheck:libs` or you get phantom errors.
+- [API integration tests](api-integration-tests.md) — api-server uses vitest+supertest against the real DB via DATABASE_URL; tests namespace rows by a run tag and clean up in afterAll.
