@@ -1,4 +1,6 @@
-import type { TrainingModuleSection } from "@workspace/db";
+import type { NodePgDatabase } from "drizzle-orm/node-postgres";
+import * as schema from "./schema";
+import { trainingModulesTable, type TrainingModuleSection } from "./schema/training";
 
 export interface TrainingSeedModule {
   slug: string;
@@ -367,3 +369,41 @@ export const trainingSeedModules: TrainingSeedModule[] = [
     ],
   },
 ];
+
+// Idempotently ensure the platform training modules exist. Inserts any module
+// (matched by slug) that is missing and never overwrites existing rows, so
+// superadmin edits made through the console are preserved across restarts and
+// deploys. Run at API server startup so a fresh or production database is
+// populated automatically, with no manual seed step.
+export async function ensureTrainingModules(
+  database: NodePgDatabase<typeof schema>,
+): Promise<{ inserted: number }> {
+  const existing = await database
+    .select({ slug: trainingModulesTable.slug })
+    .from(trainingModulesTable);
+  const have = new Set(existing.map((r) => r.slug));
+  const missing = trainingSeedModules
+    .map((m, idx) => ({
+      slug: m.slug,
+      title: m.title,
+      summary: m.summary,
+      category: m.category,
+      icon: m.icon,
+      minutes: m.minutes,
+      ordinal: idx,
+      sections: m.sections,
+    }))
+    .filter((m) => !have.has(m.slug));
+  if (missing.length === 0) {
+    return { inserted: 0 };
+  }
+  // onConflictDoNothing on the unique slug keeps this safe when several server
+  // instances start at once: each concurrent insert simply skips rows another
+  // instance already created, and the real inserted count comes from returning().
+  const inserted = await database
+    .insert(trainingModulesTable)
+    .values(missing)
+    .onConflictDoNothing({ target: trainingModulesTable.slug })
+    .returning({ id: trainingModulesTable.id });
+  return { inserted: inserted.length };
+}

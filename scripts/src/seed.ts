@@ -23,8 +23,8 @@ import {
   alertAcksTable,
   trainingModulesTable,
   trainingCompletionsTable,
+  trainingSeedModules,
 } from "@workspace/db";
-import { trainingSeedModules } from "./trainingSeedData";
 
 const scrypt = promisify(scryptCb);
 
