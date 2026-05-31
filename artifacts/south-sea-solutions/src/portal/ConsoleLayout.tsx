@@ -1,6 +1,6 @@
 import { type ReactNode } from "react";
 import { Link, useLocation } from "wouter";
-import { LayoutDashboard, Building2, GraduationCap, LogOut, ShieldCheck } from "lucide-react";
+import { LayoutDashboard, Building2, GraduationCap, LogOut, ShieldCheck, BookOpen } from "lucide-react";
 import { useAuth, useLogout } from "./auth-hooks";
 import { Button } from "@/components/ui/button";
 
@@ -40,6 +40,13 @@ export function ConsoleLayout({ children }: { children: ReactNode }) {
 
           {user ? (
             <div className="flex items-center gap-3">
+              <Link
+                href="/training"
+                className="hidden items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground sm:flex"
+              >
+                <BookOpen className="h-4 w-4" />
+                Training
+              </Link>
               <div className="hidden flex-col items-end leading-tight sm:flex">
                 <span className="text-sm font-medium">{user.name}</span>
                 <span className="text-[11px] uppercase tracking-wide text-muted-foreground">Superadmin</span>

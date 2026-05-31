@@ -19,7 +19,7 @@ import {
   useUncompleteTrainingModule,
   type TrainingModuleSection,
 } from "@workspace/api-client-react";
-import { PortalLayout } from "@/portal/PortalLayout";
+import { TrainingLayout } from "@/portal/TrainingLayout";
 import { Button } from "@/components/ui/button";
 import { trainingIcon } from "./trainingIcons";
 
@@ -96,19 +96,19 @@ export default function TrainingModulePage() {
 
   if (isLoading) {
     return (
-      <PortalLayout>
+      <TrainingLayout>
         <div className="flex items-center justify-center py-24">
           <Loader2 className="h-6 w-6 animate-spin text-primary" />
         </div>
-      </PortalLayout>
+      </TrainingLayout>
     );
   }
 
   if (!module) {
     return (
-      <PortalLayout>
+      <TrainingLayout>
         <Link
-          href="/portal/training"
+          href="/training"
           className="mb-4 inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
         >
           <ArrowLeft className="h-4 w-4" /> Back to training
@@ -116,7 +116,7 @@ export default function TrainingModulePage() {
         <div className="rounded-2xl border bg-card px-5 py-16 text-center text-sm text-muted-foreground">
           This training module could not be found.
         </div>
-      </PortalLayout>
+      </TrainingLayout>
     );
   }
 
@@ -136,9 +136,9 @@ export default function TrainingModulePage() {
   }
 
   return (
-    <PortalLayout>
+    <TrainingLayout>
       <Link
-        href="/portal/training"
+        href="/training"
         className="mb-4 inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
       >
         <ArrowLeft className="h-4 w-4" /> Back to training
@@ -204,7 +204,7 @@ export default function TrainingModulePage() {
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
           {prev ? (
             <Link
-              href={`/portal/training/${prev.slug}`}
+              href={`/training/${prev.slug}`}
               className="flex items-center gap-2 rounded-2xl border bg-card px-4 py-3 text-left transition-colors hover:border-primary/40 hover:bg-secondary/30"
             >
               <ArrowLeft className="h-4 w-4 shrink-0 text-muted-foreground" />
@@ -218,7 +218,7 @@ export default function TrainingModulePage() {
           )}
           {next ? (
             <Link
-              href={`/portal/training/${next.slug}`}
+              href={`/training/${next.slug}`}
               className="flex items-center justify-end gap-2 rounded-2xl border bg-card px-4 py-3 text-right transition-colors hover:border-primary/40 hover:bg-secondary/30"
             >
               <span className="min-w-0">
@@ -230,6 +230,6 @@ export default function TrainingModulePage() {
           ) : null}
         </div>
       </div>
-    </PortalLayout>
+    </TrainingLayout>
   );
 }

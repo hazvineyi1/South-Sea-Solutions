@@ -5,14 +5,14 @@ import {
   getGetTrainingModulesQueryKey,
   type TrainingModuleSummary,
 } from "@workspace/api-client-react";
-import { PortalLayout } from "@/portal/PortalLayout";
+import { TrainingLayout } from "@/portal/TrainingLayout";
 import { trainingIcon } from "./trainingIcons";
 
 function ModuleCard({ module }: { module: TrainingModuleSummary }) {
   const Icon = trainingIcon(module.icon);
   return (
     <Link
-      href={`/portal/training/${module.slug}`}
+      href={`/training/${module.slug}`}
       className="group flex flex-col rounded-2xl border bg-card p-5 transition-colors hover:border-primary/40 hover:bg-secondary/30"
     >
       <div className="flex items-start justify-between">
@@ -51,7 +51,7 @@ export default function TrainingPage() {
   const categories = Array.from(new Set(modules.map((m) => m.category)));
 
   return (
-    <PortalLayout>
+    <TrainingLayout>
       <div className="mb-8 flex items-start gap-3">
         <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground">
           <GraduationCap className="h-5 w-5" />
@@ -100,6 +100,6 @@ export default function TrainingPage() {
           })}
         </div>
       )}
-    </PortalLayout>
+    </TrainingLayout>
   );
 }

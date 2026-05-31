@@ -1,7 +1,7 @@
 import { type ReactNode } from "react";
 import { Link, useLocation } from "wouter";
-import { LogOut, Compass, ArrowLeft, GraduationCap, Eye, LogOut as ExitIcon, Loader2 } from "lucide-react";
-import { useAuth, useLogout, useExitOrg } from "./auth-hooks";
+import { LogOut, GraduationCap, ArrowLeft } from "lucide-react";
+import { useAuth, useLogout } from "./auth-hooks";
 import { Button } from "@/components/ui/button";
 
 function initials(name: string): string {
@@ -14,10 +14,22 @@ function initials(name: string): string {
     .toUpperCase();
 }
 
-export function PortalLayout({ children }: { children: ReactNode }) {
+function backTarget(user: { role: string; realRole?: string; impersonating?: boolean }): {
+  href: string;
+  label: string;
+} {
+  if (user.realRole === "SUPERADMIN" && !user.impersonating) {
+    return { href: "/console", label: "Back to console" };
+  }
+  if (user.role === "DRIVER") {
+    return { href: "/portal/me", label: "Back to my portal" };
+  }
+  return { href: "/portal/command", label: "Back to command center" };
+}
+
+export function TrainingLayout({ children }: { children: ReactNode }) {
   const { user } = useAuth();
   const logout = useLogout();
-  const exitOrg = useExitOrg();
   const [, setLocation] = useLocation();
 
   function handleLogout() {
@@ -26,59 +38,33 @@ export function PortalLayout({ children }: { children: ReactNode }) {
     });
   }
 
-  function handleExitOrg() {
-    exitOrg.mutate(undefined, {
-      onSuccess: () => setLocation("/console"),
-    });
-  }
+  const back = user ? backTarget(user) : null;
 
   return (
     <div className="drivewise min-h-screen bg-background font-sans text-foreground">
-      {user?.impersonating ? (
-        <div className="sticky top-0 z-30 flex flex-wrap items-center justify-center gap-2 bg-[#8a3a12] px-4 py-2 text-center text-sm text-white">
-          <Eye className="h-4 w-4" />
-          <span>
-            Viewing <span className="font-semibold">{user.orgName}</span> as superadmin.
-          </span>
-          <button
-            type="button"
-            onClick={handleExitOrg}
-            disabled={exitOrg.isPending}
-            className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 font-medium transition-colors hover:bg-white/25 disabled:opacity-60"
-          >
-            {exitOrg.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <ExitIcon className="h-3.5 w-3.5" />}
-            Exit to console
-          </button>
-        </div>
-      ) : null}
       <header className="sticky top-0 z-20 border-b bg-card/80 backdrop-blur">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
-          <Link href="/portal" className="flex items-center gap-2.5">
+          <Link href="/training" className="flex items-center gap-2.5">
             <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground">
-              <Compass className="h-5 w-5" />
+              <GraduationCap className="h-5 w-5" />
             </span>
             <span className="flex flex-col leading-tight">
-              <span className="font-display text-base font-bold tracking-tight">Drivewise</span>
-              <span className="text-[11px] text-muted-foreground">{user?.orgName}</span>
+              <span className="font-display text-base font-bold tracking-tight">Training Center</span>
+              <span className="text-[11px] text-muted-foreground">South Sea Solutions</span>
             </span>
           </Link>
 
           {user ? (
             <div className="flex items-center gap-3">
-              <Link
-                href="/training"
-                className="hidden items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground sm:flex"
-              >
-                <GraduationCap className="h-4 w-4" />
-                Training
-              </Link>
-              <Link
-                href="/"
-                className="hidden items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground sm:flex"
-              >
-                <ArrowLeft className="h-4 w-4" />
-                Back to site
-              </Link>
+              {back ? (
+                <Link
+                  href={back.href}
+                  className="hidden items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground sm:flex"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                  {back.label}
+                </Link>
+              ) : null}
               <div className="hidden flex-col items-end leading-tight sm:flex">
                 <span className="text-sm font-medium">{user.name}</span>
                 <span className="text-[11px] uppercase tracking-wide text-muted-foreground">

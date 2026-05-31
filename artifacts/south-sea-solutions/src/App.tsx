@@ -1,4 +1,4 @@
-import { Switch, Route, Router as WouterRouter } from "wouter";
+import { Switch, Route, Redirect, Router as WouterRouter } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -30,15 +30,21 @@ function Router() {
           <CommandPage />
         </RequireAuth>
       </Route>
-      <Route path="/portal/training">
+      <Route path="/training">
         <RequireAuth>
           <TrainingPage />
         </RequireAuth>
       </Route>
-      <Route path="/portal/training/:slug">
+      <Route path="/training/:slug">
         <RequireAuth>
           <TrainingModulePage />
         </RequireAuth>
+      </Route>
+      <Route path="/portal/training">
+        <Redirect to="/training" />
+      </Route>
+      <Route path="/portal/training/:slug">
+        {(params) => <Redirect to={`/training/${params.slug}`} />}
       </Route>
       <Route path="/portal/me">
         <RequireAuth roles={["DRIVER"]}>
