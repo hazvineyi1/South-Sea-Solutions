@@ -120,6 +120,18 @@ export interface CertificationInfo {
   expiresOn?: string | null;
 }
 
+export interface Telemetry {
+  speedKph: number;
+  /** @nullable */
+  odometerKm?: number | null;
+  /** @nullable */
+  lat?: number | null;
+  /** @nullable */
+  lng?: number | null;
+  /** @nullable */
+  lastPingAt?: string | null;
+}
+
 export interface DriverRecord {
   id: string;
   name: string;
@@ -144,6 +156,7 @@ export interface DriverRecord {
   /** @nullable */
   fuelPct?: number | null;
   status: string;
+  telemetry: Telemetry;
   certification: CertificationInfo;
   hours: HosClocks;
   incidents: IncidentItem[];

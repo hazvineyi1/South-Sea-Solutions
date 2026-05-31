@@ -3,7 +3,6 @@ import {
   Compass,
   Users,
   Gauge,
-  ClipboardList,
   BellRing,
   FileText,
   Activity,
@@ -13,8 +12,6 @@ import {
   Globe,
   ShieldAlert,
 } from "lucide-react";
-
-export type Audience = "ALL" | "ADMIN" | "OPERATOR";
 
 export interface TrainingSection {
   heading: string;
@@ -30,7 +27,6 @@ export interface TrainingModule {
   title: string;
   summary: string;
   category: string;
-  audience: Audience;
   icon: LucideIcon;
   minutes: number;
   sections: TrainingSection[];
@@ -49,7 +45,6 @@ export const trainingModules: TrainingModule[] = [
     title: "Welcome to Drivewise",
     summary: "What the platform does and how to find your way around it.",
     category: "Getting started",
-    audience: "ALL",
     icon: Compass,
     minutes: 4,
     sections: [
@@ -69,11 +64,11 @@ export const trainingModules: TrainingModule[] = [
         heading: "Finding your way around",
         bullets: [
           "The Drivewise logo (top left) returns you to your portal home.",
+          "Training (top right) opens this learning center.",
           "Back to site (top right) returns you to the South Sea Solutions marketing site.",
-          "Your name and role are shown in the header.",
           "Sign out ends your session securely.",
         ],
-        tip: "Your landing page depends on your role: admins open the command center, operators open operations, and drivers see only their own record.",
+        tip: "Your landing page depends on your role: owners open the command center, and drivers see only their own record and truck.",
       },
     ],
   },
@@ -82,21 +77,19 @@ export const trainingModules: TrainingModule[] = [
     title: "Roles and access",
     summary: "Who can see what across the portal, and why.",
     category: "Getting started",
-    audience: "ALL",
     icon: Users,
     minutes: 4,
     sections: [
       {
-        heading: "The three roles",
+        heading: "The two roles",
         bullets: [
-          "Admin (owner): the full-telemetry command center plus rule and certification setup.",
-          "Operator: a compliance and certification roster, without live telemetry.",
-          "Driver: their own record only.",
+          "Owner: the full command center, with live fleet telemetry, alerts, certification and rule setup.",
+          "Driver: their own record and live telemetry for their own truck, nothing else.",
         ],
       },
       {
-        heading: "Why telemetry is admin only",
-        body: "Live speed, fuel and position are sensitive. They are reserved for administrators and are withheld from operators at the data level, not just hidden on screen. Operators still get everything they need for compliance and certification work.",
+        heading: "Why drivers see only their own truck",
+        body: "Each driver gets the telemetry that matters to them: speed, fuel, position and odometer for the vehicle they are assigned to. They cannot see other drivers or the wider fleet. Access is enforced at the data level, not just hidden on screen.",
       },
       {
         heading: "Multi-tenant safety",
@@ -108,9 +101,8 @@ export const trainingModules: TrainingModule[] = [
   {
     slug: "command-center",
     title: "Reading the command center",
-    summary: "The admin telemetry dashboard explained, metric by metric.",
+    summary: "The owner telemetry dashboard explained, metric by metric.",
     category: "Daily operations",
-    audience: "ADMIN",
     icon: Gauge,
     minutes: 6,
     sections: [
@@ -141,45 +133,16 @@ export const trainingModules: TrainingModule[] = [
     ],
   },
   {
-    slug: "operations-roster",
-    title: "The operations roster",
-    summary: "The operator workspace for compliance and certification.",
-    category: "Daily operations",
-    audience: "OPERATOR",
-    icon: ClipboardList,
-    minutes: 5,
-    sections: [
-      {
-        heading: "What you see",
-        body: "The operations view leads with compliance: drivers on roster, fleet certified percentage, needs-attention count and cross-border count, followed by the driver roster itself.",
-      },
-      {
-        heading: "The roster",
-        bullets: [
-          "Each row shows the driver name, vehicle registration and certification status.",
-          "Attention and cross-border flags highlight drivers to review first.",
-          "Tap a row to open that driver's full record.",
-        ],
-      },
-      {
-        heading: "What you do not see",
-        body: "Live telemetry (speed, fuel and position) is reserved for administrators. Your roster focuses on certification and compliance instead.",
-        tip: "Use the Attention flag to prioritise which drivers to review first.",
-      },
-    ],
-  },
-  {
     slug: "managing-alerts",
     title: "Managing alerts",
     summary: "Spotting, understanding and acknowledging alerts.",
     category: "Daily operations",
-    audience: "ALL",
     icon: BellRing,
     minutes: 5,
     sections: [
       {
         heading: "Where alerts appear",
-        body: "Open alerts are listed in the Alerts tab of your portal. They flag drivers and vehicles that need a decision.",
+        body: "Open alerts are listed in the Alerts tab of the command center. They flag drivers and vehicles that need a decision.",
       },
       {
         heading: "Severity levels",
@@ -215,13 +178,12 @@ export const trainingModules: TrainingModule[] = [
     title: "Working with driver records",
     summary: "The five tabs of a driver record and the audit trail.",
     category: "Daily operations",
-    audience: "ALL",
     icon: FileText,
     minutes: 5,
     sections: [
       {
         heading: "Opening a record",
-        body: "Tap any driver row in your portal, or click a driver name inside an alert.",
+        body: "Tap any driver row in the command center, or click a driver name inside an alert.",
       },
       {
         heading: "The five tabs",
@@ -236,7 +198,7 @@ export const trainingModules: TrainingModule[] = [
       {
         heading: "Audit trail",
         body: "Every time a driver record is opened, the access is logged for compliance.",
-        tip: "Drivers can open only their own record. Admins and operators can open any driver in their organisation.",
+        tip: "Drivers can open only their own record. Owners can open any driver in their organisation.",
       },
     ],
   },
@@ -245,7 +207,6 @@ export const trainingModules: TrainingModule[] = [
     title: "ELD and electronic logging basics",
     summary: "What an electronic logging device records and why it matters.",
     category: "ELD and hours of service",
-    audience: "ALL",
     icon: Activity,
     minutes: 6,
     sections: [
@@ -282,7 +243,6 @@ export const trainingModules: TrainingModule[] = [
     title: "Understanding hours-of-service clocks",
     summary: "The continuous, daily and weekly clocks and their statuses.",
     category: "ELD and hours of service",
-    audience: "ALL",
     icon: Clock,
     minutes: 6,
     sections: [
@@ -316,7 +276,6 @@ export const trainingModules: TrainingModule[] = [
     title: "Configuring hours-of-service rule profiles",
     summary: "Setting the hours-of-service limits for your whole fleet.",
     category: "ELD and hours of service",
-    audience: "ADMIN",
     icon: SlidersHorizontal,
     minutes: 5,
     sections: [
@@ -351,7 +310,6 @@ export const trainingModules: TrainingModule[] = [
     title: "Certification and the Drivewise standard",
     summary: "Keeping your fleet certified and ahead of expiries.",
     category: "Compliance",
-    audience: "ALL",
     icon: BadgeCheck,
     minutes: 4,
     sections: [
@@ -383,7 +341,6 @@ export const trainingModules: TrainingModule[] = [
     title: "Cross-border corridor operations",
     summary: "Handling regional cross-border trips with confidence.",
     category: "Compliance",
-    audience: "ALL",
     icon: Globe,
     minutes: 4,
     sections: [
@@ -406,7 +363,7 @@ export const trainingModules: TrainingModule[] = [
           "Documents are in order.",
           "There is enough hours headroom for the full trip.",
         ],
-        tip: "Cross-border counts appear on both the command center and the operations view.",
+        tip: "The cross-border count appears on the command center alongside the rest of your fleet metrics.",
       },
     ],
   },
@@ -415,7 +372,6 @@ export const trainingModules: TrainingModule[] = [
     title: "Safety incidents and follow-up",
     summary: "Reviewing and responding to recorded safety incidents.",
     category: "Compliance",
-    audience: "ALL",
     icon: ShieldAlert,
     minutes: 4,
     sections: [
@@ -439,12 +395,6 @@ export const trainingModules: TrainingModule[] = [
     ],
   },
 ];
-
-export function audienceLabel(audience: Audience): string {
-  if (audience === "ADMIN") return "Admins";
-  if (audience === "OPERATOR") return "Operators";
-  return "All roles";
-}
 
 export function getTrainingModule(slug: string): TrainingModule | undefined {
   return trainingModules.find((m) => m.slug === slug);

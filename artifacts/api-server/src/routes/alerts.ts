@@ -7,7 +7,7 @@ import { loadFleetContext, buildAlerts } from "../lib/portal";
 
 const router: IRouter = Router();
 
-router.get("/alerts", requireAuth, requireRole("OWNER", "OPERATOR"), async (req, res): Promise<void> => {
+router.get("/alerts", requireAuth, requireRole("OWNER"), async (req, res): Promise<void> => {
   const orgId = req.user!.orgId;
   const ctx = await loadFleetContext(orgId);
   const ackRows = await db.select().from(alertAcksTable).where(eq(alertAcksTable.orgId, orgId));
@@ -15,7 +15,7 @@ router.get("/alerts", requireAuth, requireRole("OWNER", "OPERATOR"), async (req,
   res.json(GetAlertsResponse.parse(buildAlerts(ctx, ackKeys)));
 });
 
-router.post("/alerts/acknowledge", requireAuth, requireRole("OWNER", "OPERATOR"), async (req, res): Promise<void> => {
+router.post("/alerts/acknowledge", requireAuth, requireRole("OWNER"), async (req, res): Promise<void> => {
   const parsed = AcknowledgeAlertBody.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ error: parsed.error.message });

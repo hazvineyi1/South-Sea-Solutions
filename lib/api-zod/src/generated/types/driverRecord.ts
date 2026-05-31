@@ -10,6 +10,7 @@ import type { CourseItem } from './courseItem';
 import type { DocumentItem } from './documentItem';
 import type { HosClocks } from './hosClocks';
 import type { IncidentItem } from './incidentItem';
+import type { Telemetry } from './telemetry';
 
 export interface DriverRecord {
   id: string;
@@ -35,6 +36,7 @@ export interface DriverRecord {
   /** @nullable */
   fuelPct?: number | null;
   status: string;
+  telemetry: Telemetry;
   certification: CertificationInfo;
   hours: HosClocks;
   incidents: IncidentItem[];

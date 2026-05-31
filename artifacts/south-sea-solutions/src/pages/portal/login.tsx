@@ -8,8 +8,7 @@ import { Label } from "@/components/ui/label";
 
 function destinationFor(role: string): string {
   if (role === "DRIVER") return "/portal/me";
-  if (role === "OWNER") return "/portal/command";
-  return "/portal/fleet";
+  return "/portal/command";
 }
 
 export default function LoginPage() {

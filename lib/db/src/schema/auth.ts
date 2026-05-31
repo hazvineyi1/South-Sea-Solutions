@@ -3,7 +3,7 @@ import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 import { orgsTable } from "./org";
 
-export const userRoles = ["OWNER", "OPERATOR", "DRIVER"] as const;
+export const userRoles = ["OWNER", "DRIVER"] as const;
 export type UserRole = (typeof userRoles)[number];
 
 export const usersTable = pgTable("users", {

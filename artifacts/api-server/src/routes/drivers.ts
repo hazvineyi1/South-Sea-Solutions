@@ -16,8 +16,11 @@ router.get("/drivers/:id", requireAuth, async (req, res): Promise<void> => {
   const driverId = params.data.id;
   const user = req.user!;
 
-  // Drivers may only read their own record.
-  if (user.role === "DRIVER" && user.driverId !== driverId) {
+  // Explicit allowlist: owners may read any driver in their org; drivers may
+  // read only their own record. Any other role is denied.
+  const allowed =
+    user.role === "OWNER" || (user.role === "DRIVER" && user.driverId === driverId);
+  if (!allowed) {
     res.status(403).json({ error: "Forbidden" });
     return;
   }

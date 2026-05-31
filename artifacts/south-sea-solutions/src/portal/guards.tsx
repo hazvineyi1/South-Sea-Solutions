@@ -41,7 +41,6 @@ export function PortalIndex() {
   if (!user) {
     return <Redirect to="/login" />;
   }
-  const dest =
-    user.role === "DRIVER" ? "/portal/me" : user.role === "OWNER" ? "/portal/command" : "/portal/fleet";
+  const dest = user.role === "DRIVER" ? "/portal/me" : "/portal/command";
   return <Redirect to={dest} />;
 }

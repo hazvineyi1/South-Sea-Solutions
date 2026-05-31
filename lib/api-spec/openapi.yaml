@@ -13,7 +13,7 @@ tags:
   - name: auth
     description: Authentication
   - name: fleet
-    description: Operator fleet platform
+    description: Owner fleet platform
   - name: drivers
     description: Driver records
   - name: alerts
@@ -404,6 +404,20 @@ components:
           type: ["string", "null"]
         expiresOn:
           type: ["string", "null"]
+    Telemetry:
+      type: object
+      required: [speedKph]
+      properties:
+        speedKph:
+          type: integer
+        odometerKm:
+          type: ["integer", "null"]
+        lat:
+          type: ["number", "null"]
+        lng:
+          type: ["number", "null"]
+        lastPingAt:
+          type: ["string", "null"]
     DriverRecord:
       type: object
       required:
@@ -414,6 +428,7 @@ components:
         - safetyScore
         - onTimePct
         - status
+        - telemetry
         - certification
         - hours
         - incidents
@@ -450,6 +465,8 @@ components:
           type: ["integer", "null"]
         status:
           type: string
+        telemetry:
+          $ref: "#/components/schemas/Telemetry"
         certification:
           $ref: "#/components/schemas/CertificationInfo"
         hours:

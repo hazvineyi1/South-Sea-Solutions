@@ -15,7 +15,7 @@ function pickRule(rules: (typeof ruleProfilesTable.$inferSelect)[]) {
   return rules.find((r) => r.isDefault) ?? rules[0];
 }
 
-router.get("/setup/rule-profile", requireAuth, requireRole("OWNER", "OPERATOR"), async (req, res): Promise<void> => {
+router.get("/setup/rule-profile", requireAuth, requireRole("OWNER"), async (req, res): Promise<void> => {
   const rules = await db.select().from(ruleProfilesTable).where(eq(ruleProfilesTable.orgId, req.user!.orgId));
   const rule = pickRule(rules);
   if (!rule) {
@@ -25,7 +25,7 @@ router.get("/setup/rule-profile", requireAuth, requireRole("OWNER", "OPERATOR"),
   res.json(GetRuleProfileResponse.parse(rule));
 });
 
-router.patch("/setup/rule-profile", requireAuth, requireRole("OWNER", "OPERATOR"), async (req, res): Promise<void> => {
+router.patch("/setup/rule-profile", requireAuth, requireRole("OWNER"), async (req, res): Promise<void> => {
   const parsed = UpdateRuleProfileBody.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ error: parsed.error.message });
@@ -46,7 +46,7 @@ router.patch("/setup/rule-profile", requireAuth, requireRole("OWNER", "OPERATOR"
   res.json(UpdateRuleProfileResponse.parse(updated));
 });
 
-router.get("/setup/org", requireAuth, requireRole("OWNER", "OPERATOR"), async (req, res): Promise<void> => {
+router.get("/setup/org", requireAuth, requireRole("OWNER"), async (req, res): Promise<void> => {
   const [org] = await db.select().from(orgsTable).where(eq(orgsTable.id, req.user!.orgId));
   if (!org) {
     res.status(404).json({ error: "Org not found" });

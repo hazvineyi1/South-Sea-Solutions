@@ -23,4 +23,5 @@ export * from './loginInput';
 export * from './orgProfile';
 export * from './ruleProfile';
 export * from './ruleProfileUpdate';
+export * from './telemetry';
 export * from './vehicleRow';

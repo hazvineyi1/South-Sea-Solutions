@@ -1,20 +1,7 @@
 import { Link, useParams } from "wouter";
 import { ArrowLeft, ArrowRight, Clock, Lightbulb, AlertTriangle } from "lucide-react";
 import { PortalLayout } from "@/portal/PortalLayout";
-import { StatusPill } from "@/portal/ui";
-import {
-  trainingModules,
-  getTrainingModule,
-  audienceLabel,
-  type Audience,
-  type TrainingSection,
-} from "./trainingContent";
-
-function audienceTone(audience: Audience) {
-  if (audience === "ADMIN") return "teal" as const;
-  if (audience === "OPERATOR") return "blue" as const;
-  return "neutral" as const;
-}
+import { trainingModules, getTrainingModule, type TrainingSection } from "./trainingContent";
 
 function Section({ section, index }: { section: TrainingSection; index: number }) {
   return (
@@ -112,7 +99,6 @@ export default function TrainingModulePage() {
                 <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                   {module.category}
                 </span>
-                <StatusPill tone={audienceTone(module.audience)}>{audienceLabel(module.audience)}</StatusPill>
               </div>
               <h1 className="mt-1.5 font-display text-2xl font-bold tracking-tight">{module.title}</h1>
               <p className="mt-1.5 text-sm text-muted-foreground">{module.summary}</p>

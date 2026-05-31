@@ -296,35 +296,6 @@ export function buildFleetSummary(ctx: FleetContext, rows: VehicleRowOut[]) {
   };
 }
 
-type FleetSummaryOut = ReturnType<typeof buildFleetSummary>;
-
-// Live telemetry (speed, fuel, position, odometer, last ping and fleet aggregates) is
-// owner-only. Operators get a compliance and certification view, so we strip these fields
-// at the API layer for any non-OWNER role rather than relying on the client to hide them.
-export function redactVehicleRowsForOperator(rows: VehicleRowOut[]): VehicleRowOut[] {
-  return rows.map((r) => ({
-    vehicleId: r.vehicleId,
-    reg: r.reg,
-    driverId: r.driverId,
-    driverName: r.driverName,
-    status: r.status,
-    certification: r.certification,
-    crossBorder: r.crossBorder,
-    needsAttention: r.needsAttention,
-  }));
-}
-
-export function redactFleetSummaryForOperator(summary: FleetSummaryOut) {
-  return {
-    activeVehicles: summary.activeVehicles,
-    crossBorderCount: summary.crossBorderCount,
-    needsAttentionCount: summary.needsAttentionCount,
-    fleetCertifiedPct: summary.fleetCertifiedPct,
-    movingCount: summary.movingCount,
-    idlingCount: summary.idlingCount,
-  };
-}
-
 export function buildDriverRecord(ctx: FleetContext, driver: Driver) {
   const ruleInput = ruleToInput(ctx.rule);
   const duty = (ctx.dutyByDriver.get(driver.id) ?? []).map((e) => ({
@@ -363,6 +334,13 @@ export function buildDriverRecord(ctx: FleetContext, driver: Driver) {
     placeLabel: ping?.placeLabel ?? null,
     fuelPct: fuel?.fuelPct ?? null,
     status,
+    telemetry: {
+      speedKph: ping?.speedKph ?? 0,
+      odometerKm: fuel?.odometerKm ?? null,
+      lat: ping?.lat ?? null,
+      lng: ping?.lng ?? null,
+      lastPingAt: ping?.recordedAt ? toIso(ping.recordedAt) : null,
+    },
     certification: {
       status: cert?.status ?? "IN_PROGRESS",
       state: certState,

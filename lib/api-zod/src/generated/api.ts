@@ -116,6 +116,13 @@ export const GetDriverRecordResponse = zod.object({
   "placeLabel": zod.string().nullish(),
   "fuelPct": zod.number().nullish(),
   "status": zod.string(),
+  "telemetry": zod.object({
+  "speedKph": zod.number(),
+  "odometerKm": zod.number().nullish(),
+  "lat": zod.number().nullish(),
+  "lng": zod.number().nullish(),
+  "lastPingAt": zod.string().nullish()
+}),
   "certification": zod.object({
   "status": zod.string(),
   "state": zod.string(),

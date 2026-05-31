@@ -333,14 +333,6 @@ async function main(): Promise<void> {
       name: "Keabetswe Owner",
       locale: "en",
     },
-    {
-      orgId: org.id,
-      email: "operator@drivewise.test",
-      passwordHash: await hashPassword("Drivewise2026"),
-      role: "OPERATOR",
-      name: "Boitumelo Operator",
-      locale: "en",
-    },
   ]);
 
   void driverUserId;

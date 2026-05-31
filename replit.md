@@ -10,7 +10,7 @@ A login-gated, multi-tenant portal hub built on the South Sea Solutions marketin
 - `pnpm run build` — typecheck + build all packages
 - `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
 - `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
-- `pnpm --filter @workspace/db run seed` — seed the Drivewise demo org, users, and drivers
+- `pnpm --filter @workspace/scripts run seed` — seed the Drivewise demo org, users, and drivers
 - Required env: `DATABASE_URL` (Postgres), `SESSION_SECRET` (cookie session signing)
 
 ## Stack
@@ -32,14 +32,17 @@ A login-gated, multi-tenant portal hub built on the South Sea Solutions marketin
 - Auth + org-scoping helpers: `artifacts/api-server/src/lib/auth.ts`, `lib/portal.ts`
 - Hours-of-service engine: `artifacts/api-server/src/lib/hosEngine.ts`
 - Auth middleware: `artifacts/api-server/src/middlewares/requireAuth.ts` (`requireAuth`, `requireRole`)
-- Portal frontend: `artifacts/south-sea-solutions/src/portal/*` (auth context, guards, layout, ui) and `src/pages/portal/*` (login, fleet, driver-record, driver-home)
-- Training center: `src/pages/portal/trainingContent.ts` (static module content data), `training.tsx` (index, audience filter + category grouping), `training-module.tsx` (detail with sections/steps/callouts + prev/next). Routes `/portal/training` and `/portal/training/:slug`, guarded OWNER/OPERATOR; header "Training" link shown to OWNER/OPERATOR only.
+- Portal frontend: `artifacts/south-sea-solutions/src/portal/*` (auth context, guards, layout, ui) and `src/pages/portal/*` (login, command, driver-record, driver-home)
+- Training center: `src/pages/portal/trainingContent.ts` (static module content data, grouped by category, no audience concept), `training.tsx` (index, category grouping), `training-module.tsx` (detail with sections/steps/callouts + prev/next). Routes `/portal/training` and `/portal/training/:slug`, guarded OWNER only; header "Training" link shown to OWNER only.
 - Drivewise theme: scoped `.drivewise` class in `src/index.css`
 
 ## Architecture decisions
 
-- Single gateway login at `/login`; role-based redirect to the right portal view (OWNER sees the full-telemetry command center, OPERATOR sees the leaner operations view, DRIVER sees own record).
-- OWNER vs OPERATOR portals are genuinely different. Live telemetry (speed, fuel, position, odometer, last ping, and the fleet telemetry aggregates) is OWNER-only and is redacted at the API layer (`redactVehicleRowsForOperator`, `redactFleetSummaryForOperator` in `portal.ts`), not just hidden in the UI. `/portal/command` is also route-guarded to OWNER only.
+- Single gateway login at `/login`; role-based redirect to the right portal view (OWNER sees the full-telemetry command center, DRIVER sees own record + own truck telemetry).
+- Two roles only: OWNER and DRIVER (OPERATOR was removed entirely). OWNER gets the full command center (live fleet telemetry, alerts, certification, rule setup). DRIVER sees only their own record plus live telemetry for their own truck.
+- All owner-only endpoints (`/fleet/*`, `/alerts*`, `/setup/*`) are guarded with `requireRole("OWNER")`. `/portal/command` and the training routes are route-guarded OWNER only.
+- The driver record endpoint (`/drivers/:id`) uses an explicit allowlist: OWNER may read any driver in-org, DRIVER may read only their own record. Any other role is denied (defense against stale roles).
+- DRIVER telemetry: `DriverRecord.telemetry` (speedKph, odometerKm, lat, lng, lastPingAt) is built in `buildDriverRecord`; `fuelPct` and `placeLabel` stay top-level (shared with the owner view). The driver-home "Your truck" panel renders these for the driver's own vehicle only.
 - Multi-tenant: every data read is scoped by `req.user.orgId`. The driver record route additionally enforces DRIVER self-only access and an org match.
 - Every successful driver-record read writes an `audit_logs` row.
 - Frontend and API share an origin via the reverse proxy, so the httpOnly session cookie flows automatically; the client uses relative `/api` URLs.
@@ -48,9 +51,8 @@ A login-gated, multi-tenant portal hub built on the South Sea Solutions marketin
 ## Product
 
 - Owners log in to a command center: full fleet telemetry (live speed, fuel, position, odometer, last ping plus fleet aggregates), certification and compliance, acknowledge alerts, and edit the hours-of-service rule profile.
-- Operators log in to a leaner operations view: a driver roster with certification and compliance status (no live telemetry), acknowledge alerts, and edit the rule profile.
-- Owners and operators open any driver record in their org: overview, hours (continuous/daily/weekly clocks), safety incidents, training/certification, and documents.
-- Drivers log in and see only their own record.
+- Owners open any driver record in their org: overview, hours (continuous/daily/weekly clocks), safety incidents, training/certification, and documents.
+- Drivers log in and see only their own record, plus a "Your truck" panel with live telemetry (speed, fuel, odometer, location, last ping) for their assigned vehicle.
 
 ## User preferences
 
@@ -59,7 +61,7 @@ A login-gated, multi-tenant portal hub built on the South Sea Solutions marketin
 ## Gotchas
 
 - Generated query hooks are `export function useGetXxx` (not `const`). When passing partial `query` options you MUST also pass `queryKey` (use the matching `getGetXxxQueryKey()`).
-- `requireRole("OWNER", "OPERATOR")` must guard every operator-only endpoint, including read-only setup endpoints, or drivers can reach them.
+- `requireRole("OWNER")` must guard every owner-only endpoint (fleet, alerts, setup), including read-only setup endpoints, or drivers can reach them. The `/drivers/:id` route uses an explicit OWNER-or-self allowlist rather than `requireRole`.
 - Always run `pnpm --filter @workspace/api-spec run codegen` after changing the OpenAPI spec.
 
 ## Pointers
