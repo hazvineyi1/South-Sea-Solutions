@@ -1,0 +1,2 @@
+- [Generated query hook usage](orval-query-hooks.md) — hooks are `export function useGetXxx`; passing partial `query` options requires also passing the matching `getGetXxxQueryKey()`.
+- [Portal multi-tenancy rules](portal-tenancy.md) — every read scoped by orgId; operator-only endpoints (incl. read-only setup) need requireRole; driver reads write audit log.

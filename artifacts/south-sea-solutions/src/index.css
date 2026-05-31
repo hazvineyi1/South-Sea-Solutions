@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&family=Sora:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 @import "tw-animate-css";
 @plugin "@tailwindcss/typography";
@@ -159,4 +159,45 @@
   body {
     @apply font-sans antialiased bg-background text-foreground selection:bg-primary selection:text-primary-foreground;
   }
+}
+
+/* Drivewise portal theme: light cream and teal, scoped to portal routes only.
+   Overrides the dark oceanic marketing tokens within the .drivewise wrapper. */
+.drivewise {
+  --app-font-sans: 'Inter', sans-serif;
+  --radius: 1.125rem;
+
+  --background: 44 27% 93%;
+  --foreground: 168 22% 14%;
+
+  --border: 41 26% 88%;
+  --input: 41 26% 88%;
+  --ring: 171 76% 25%;
+
+  --card: 0 0% 100%;
+  --card-foreground: 168 22% 14%;
+  --card-border: 41 26% 88%;
+
+  --popover: 0 0% 100%;
+  --popover-foreground: 168 22% 14%;
+  --popover-border: 41 26% 88%;
+
+  --primary: 171 76% 25%;
+  --primary-foreground: 0 0% 100%;
+
+  --secondary: 150 26% 91%;
+  --secondary-foreground: 171 76% 25%;
+
+  --muted: 44 20% 90%;
+  --muted-foreground: 162 8% 39%;
+
+  --accent: 150 26% 91%;
+  --accent-foreground: 171 76% 25%;
+
+  --destructive: 5 53% 49%;
+  --destructive-foreground: 0 0% 100%;
+}
+
+.font-display {
+  font-family: 'Sora', sans-serif;
 }

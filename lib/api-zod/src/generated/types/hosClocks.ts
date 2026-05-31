@@ -5,7 +5,11 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+import type { Clock } from './clock';
 
-export interface HealthStatus {
+export interface HosClocks {
   status: string;
+  continuous: Clock;
+  daily: Clock;
+  weekly: Clock;
 }
