@@ -12,4 +12,6 @@ export interface PlatformTotals {
   drivers: number;
   vehicles: number;
   openAlerts: number;
+  /** Percent (0-100) of all module/user pairs completed across every org. */
+  trainingCompletionRate: number;
 }

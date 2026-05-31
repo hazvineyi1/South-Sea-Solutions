@@ -298,6 +298,8 @@ export interface PlatformTotals {
   drivers: number;
   vehicles: number;
   openAlerts: number;
+  /** Percent (0-100) of all module/user pairs completed across every org. */
+  trainingCompletionRate: number;
 }
 
 export interface PlatformOrgStat {
@@ -309,6 +311,8 @@ export interface PlatformOrgStat {
   drivers: number;
   vehicles: number;
   openAlerts: number;
+  /** Percent (0-100) of this org's module/user pairs completed. */
+  trainingCompletionRate: number;
 }
 
 export interface PlatformOverview {

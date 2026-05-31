@@ -68,8 +68,16 @@ async function openAlertCountForOrg(orgId: string): Promise<number> {
   return alerts.filter((a) => !a.acknowledged).length;
 }
 
+function completionPercent(completed: number, possible: number): number {
+  if (possible <= 0) return 0;
+  return Math.round((completed / possible) * 100);
+}
+
 router.get("/platform/overview", ...guards, async (_req, res): Promise<void> => {
   const orgs = await db.select().from(orgsTable).orderBy(asc(orgsTable.name));
+
+  // Training modules are global, so the count is shared across every org.
+  const moduleCount = (await db.select().from(trainingModulesTable)).length;
 
   const perOrg = await Promise.all(
     orgs.map(async (org) => {
@@ -82,6 +90,20 @@ router.get("/platform/overview", ...guards, async (_req, res): Promise<void> => 
           ? await db.select().from(vehiclesTable).where(inArray(vehiclesTable.fleetId, fleetIds))
           : [];
       const openAlerts = await openAlertCountForOrg(org.id);
+
+      // Completion rate: percent of (user x module) pairs this org's users have finished.
+      const userIds = users.map((u) => u.id);
+      const completed =
+        userIds.length > 0 && moduleCount > 0
+          ? (
+              await db
+                .select()
+                .from(trainingCompletionsTable)
+                .where(inArray(trainingCompletionsTable.userId, userIds))
+            ).length
+          : 0;
+      const possible = users.length * moduleCount;
+
       return {
         id: org.id,
         name: org.name,
@@ -91,9 +113,15 @@ router.get("/platform/overview", ...guards, async (_req, res): Promise<void> => 
         drivers: drivers.length,
         vehicles: vehicles.length,
         openAlerts,
+        completed,
+        possible,
+        trainingCompletionRate: completionPercent(completed, possible),
       };
     }),
   );
+
+  const totalCompleted = perOrg.reduce((n, o) => n + o.completed, 0);
+  const totalPossible = perOrg.reduce((n, o) => n + o.possible, 0);
 
   const totals = {
     orgs: orgs.length,
@@ -101,6 +129,7 @@ router.get("/platform/overview", ...guards, async (_req, res): Promise<void> => 
     drivers: perOrg.reduce((n, o) => n + o.drivers, 0),
     vehicles: perOrg.reduce((n, o) => n + o.vehicles, 0),
     openAlerts: perOrg.reduce((n, o) => n + o.openAlerts, 0),
+    trainingCompletionRate: completionPercent(totalCompleted, totalPossible),
   };
 
   res.json(GetPlatformOverviewResponse.parse({ totals, orgs: perOrg }));

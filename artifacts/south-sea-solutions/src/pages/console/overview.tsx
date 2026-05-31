@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { Building2, Users, Truck, Car, BellRing, Loader2, LogIn, ChevronRight } from "lucide-react";
+import { Building2, Users, Truck, Car, BellRing, GraduationCap, Loader2, LogIn, ChevronRight } from "lucide-react";
 import {
   useGetPlatformOverview,
   getGetPlatformOverviewQueryKey,
@@ -10,7 +10,7 @@ import { useEnterOrg } from "@/portal/auth-hooks";
 import { StatusPill } from "@/portal/ui";
 import { Button } from "@/components/ui/button";
 
-function StatCard({ icon, label, value }: { icon: React.ReactNode; label: string; value: number }) {
+function StatCard({ icon, label, value }: { icon: React.ReactNode; label: string; value: number | string }) {
   return (
     <div className="rounded-2xl border bg-card p-5">
       <div className="flex items-center gap-2 text-muted-foreground">
@@ -65,6 +65,10 @@ function OrgRow({ org }: { org: PlatformOrgStat }) {
           <BellRing className="h-3.5 w-3.5" />
           {org.openAlerts}
         </span>
+        <span className="inline-flex items-center gap-1">
+          <GraduationCap className="h-3.5 w-3.5" />
+          {org.trainingCompletionRate}%
+        </span>
       </div>
       <Button
         variant="outline"
@@ -106,12 +110,13 @@ export default function ConsoleOverviewPage() {
         </div>
       ) : data ? (
         <>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-6">
             <StatCard icon={<Building2 className="h-4 w-4" />} label="Orgs" value={data.totals.orgs} />
             <StatCard icon={<Users className="h-4 w-4" />} label="Users" value={data.totals.users} />
             <StatCard icon={<Truck className="h-4 w-4" />} label="Drivers" value={data.totals.drivers} />
             <StatCard icon={<Car className="h-4 w-4" />} label="Vehicles" value={data.totals.vehicles} />
             <StatCard icon={<BellRing className="h-4 w-4" />} label="Open alerts" value={data.totals.openAlerts} />
+            <StatCard icon={<GraduationCap className="h-4 w-4" />} label="Training done" value={`${data.totals.trainingCompletionRate}%`} />
           </div>
 
           <div className="mt-8 rounded-2xl border bg-card">

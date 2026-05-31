@@ -1061,7 +1061,7 @@ components:
             $ref: "#/components/schemas/PlatformOrgStat"
     PlatformTotals:
       type: object
-      required: [orgs, users, drivers, vehicles, openAlerts]
+      required: [orgs, users, drivers, vehicles, openAlerts, trainingCompletionRate]
       properties:
         orgs:
           type: integer
@@ -1073,9 +1073,12 @@ components:
           type: integer
         openAlerts:
           type: integer
+        trainingCompletionRate:
+          type: integer
+          description: Percent (0-100) of all module/user pairs completed across every org.
     PlatformOrgStat:
       type: object
-      required: [id, name, region, active, users, drivers, vehicles, openAlerts]
+      required: [id, name, region, active, users, drivers, vehicles, openAlerts, trainingCompletionRate]
       properties:
         id:
           type: string
@@ -1093,6 +1096,9 @@ components:
           type: integer
         openAlerts:
           type: integer
+        trainingCompletionRate:
+          type: integer
+          description: Percent (0-100) of this org's module/user pairs completed.
     PlatformOrg:
       type: object
       required: [id, name, region, active, createdAt]

@@ -343,7 +343,8 @@ export const GetPlatformOverviewResponse = zod.object({
   "users": zod.number(),
   "drivers": zod.number(),
   "vehicles": zod.number(),
-  "openAlerts": zod.number()
+  "openAlerts": zod.number(),
+  "trainingCompletionRate": zod.number().describe('Percent (0-100) of all module\/user pairs completed across every org.')
 }),
   "orgs": zod.array(zod.object({
   "id": zod.string(),
@@ -353,7 +354,8 @@ export const GetPlatformOverviewResponse = zod.object({
   "users": zod.number(),
   "drivers": zod.number(),
   "vehicles": zod.number(),
-  "openAlerts": zod.number()
+  "openAlerts": zod.number(),
+  "trainingCompletionRate": zod.number().describe('Percent (0-100) of this org\'s module\/user pairs completed.')
 }))
 })
 
