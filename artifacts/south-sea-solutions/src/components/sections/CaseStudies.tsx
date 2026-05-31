@@ -9,7 +9,7 @@ const studies = [
       "A complete platform for managing driver compliance, fatigue monitoring, and professional certification across a large fleet. The system gave operators irrefutable oversight of driver status and qualifications, enabling them to win contracts with clients that impose strict safety standards.",
     sector: "Transport and Logistics",
     scope: "Architecture and Delivery",
-    image: "/images/drivewise.png",
+    image: "/images/fleet-platform.png",
     imageAlt: "Fleet management platform dashboard",
     order: "left",
   },

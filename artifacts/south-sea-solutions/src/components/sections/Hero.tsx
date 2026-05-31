@@ -1,6 +1,5 @@
 import { motion } from "framer-motion";
 import { ArrowRight, ChevronDown } from "lucide-react";
-import { Link } from "wouter";
 
 const fadeInUp = {
   hidden: { opacity: 0, y: 30 },
@@ -51,22 +50,22 @@ export function Hero() {
             </motion.p>
 
             <motion.div variants={fadeInUp} className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
-              <Link href="#work" className="inline-flex items-center justify-center bg-primary text-primary-foreground px-8 py-4 font-medium transition-transform hover:-translate-y-1">
+              <a href="#work" className="inline-flex items-center justify-center bg-primary text-primary-foreground px-8 py-4 font-medium transition-transform hover:-translate-y-1">
                 Explore our work
                 <ArrowRight className="ml-2 w-4 h-4" />
-              </Link>
-              <Link href="#contact" className="inline-flex items-center justify-center px-8 py-4 font-medium border border-border transition-colors hover:bg-white/5">
+              </a>
+              <a href="#contact" className="inline-flex items-center justify-center px-8 py-4 font-medium border border-border transition-colors hover:bg-white/5">
                 Engage us
-              </Link>
+              </a>
             </motion.div>
           </motion.div>
         </div>
       </div>
 
       <div className="absolute bottom-8 left-6 md:left-1/2 md:-translate-x-1/2 z-10 animate-bounce">
-        <Link href="#capabilities" className="text-muted-foreground hover:text-primary transition-colors">
+        <a href="#capabilities" className="text-muted-foreground hover:text-primary transition-colors">
           <ChevronDown className="w-6 h-6" />
-        </Link>
+        </a>
       </div>
     </section>
   );

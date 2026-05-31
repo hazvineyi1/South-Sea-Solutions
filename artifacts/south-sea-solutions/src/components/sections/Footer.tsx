@@ -17,10 +17,7 @@ export function Footer() {
         
         <div className="mt-12 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 text-xs text-muted-foreground">
           <p>&copy; {new Date().getFullYear()} South Sea Solutions. All rights reserved.</p>
-          <div className="flex gap-4">
-            <a href="#" className="hover:text-foreground transition-colors">Privacy Policy</a>
-            <a href="#" className="hover:text-foreground transition-colors">Terms of Service</a>
-          </div>
+          <a href="#contact" className="hover:text-foreground transition-colors">Get in touch</a>
         </div>
       </div>
     </footer>
