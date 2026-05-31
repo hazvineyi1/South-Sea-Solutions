@@ -30,3 +30,9 @@ id = "VkYGbdwaJssAaJFFbVEjM"
 uri = "file://artifacts/south-sea-solutions/public/images/strategy-architecture.png"
 type = "image"
 title = "Abstract strategic architecture map"
+
+[[generated]]
+id = "w_3s67TIsROSw56SgWFLa"
+uri = "file://attached_assets/generated_images/dark_navy_blue_digital_69ff.png"
+type = "image"
+title = "generated_image"
