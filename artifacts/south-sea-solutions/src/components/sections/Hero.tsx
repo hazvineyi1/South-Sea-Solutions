@@ -47,7 +47,7 @@ export function Hero() {
               variants={fadeInUp}
               className="text-lg md:text-xl text-muted-foreground max-w-2xl leading-relaxed mb-12"
             >
-              We design and deliver bespoke software for clients across Africa and emerging markets. We do the hard thinking before a single line of code is written, and we stay until the product ships.
+              We design and deliver bespoke software platforms for complex organisations. We do the hard thinking before a single line of code is written, and we stay until the product ships.
             </motion.p>
 
             <motion.div variants={fadeInUp} className="flex flex-col sm:flex-row items-start sm:items-center gap-6">

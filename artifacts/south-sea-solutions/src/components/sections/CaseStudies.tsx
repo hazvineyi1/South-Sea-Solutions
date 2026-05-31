@@ -1,5 +1,43 @@
 import { motion } from "framer-motion";
-import { ArrowRight } from "lucide-react";
+
+const studies = [
+  {
+    tag: "Confidential Client",
+    title: "Fleet Risk and Certification Platform",
+    summary: "Driver risk management and certification system for a commercial transport operator.",
+    detail:
+      "A complete platform for managing driver compliance, fatigue monitoring, and professional certification across a large fleet. The system gave operators irrefutable oversight of driver status and qualifications, enabling them to win contracts with clients that impose strict safety standards.",
+    sector: "Transport and Logistics",
+    scope: "Architecture and Delivery",
+    image: "/images/drivewise.png",
+    imageAlt: "Fleet management platform dashboard",
+    order: "left",
+  },
+  {
+    tag: "Confidential Client",
+    title: "Customs and Clearance Gateway",
+    summary: "Unified cargo processing platform for a major port authority.",
+    detail:
+      "Replaced fragmented legacy systems with a secure, high-throughput platform that accelerated cargo processing by 40%. Delivered comprehensive audit trails and integration with national revenue services.",
+    sector: "Maritime and Customs",
+    scope: "Architecture and Delivery",
+    image: "/images/logistics-port.png",
+    imageAlt: "Industrial port infrastructure",
+    order: "right",
+  },
+  {
+    tag: "Confidential Client",
+    title: "Field Intelligence and Yield Platform",
+    summary: "Machine learning pipeline and mobile application for distributed field operations.",
+    detail:
+      "An offline-first mobile platform deployed across tens of thousands of field agents, engineered for low-bandwidth environments. Enabled organisations to collect structured data, run predictive models, and act on insights without reliable connectivity.",
+    sector: "Agriculture and Finance",
+    scope: "Data Strategy and Mobile",
+    image: "/images/strategy-architecture.png",
+    imageAlt: "Abstract data architecture visualisation",
+    order: "left",
+  },
+];
 
 export function CaseStudies() {
   return (
@@ -13,107 +51,50 @@ export function CaseStudies() {
             className="max-w-2xl"
           >
             <h2 className="text-3xl md:text-5xl font-semibold mb-6">Proven in the field.</h2>
-            <p className="text-muted-foreground text-lg">Delivering critical systems where stakes are high and infrastructure is developing.</p>
+            <p className="text-muted-foreground text-lg">
+              Delivering critical systems where stakes are high and the margin for error is low.
+            </p>
           </motion.div>
         </div>
 
         <div className="space-y-24 md:space-y-32">
-          {/* Drivewise Case Study - Flagship */}
-          <motion.div 
-            initial={{ opacity: 0, y: 40 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 0.7 }}
-            className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24 items-center"
-          >
-            <div className="order-2 lg:order-1">
-              <div className="inline-block px-3 py-1 bg-primary/10 text-primary font-mono text-xs uppercase tracking-wider mb-6">Flagship Engagement</div>
-              <h3 className="text-3xl md:text-4xl font-semibold mb-6">Drivewise</h3>
-              <p className="text-xl text-foreground mb-4">Driver-risk and certification platform for commercial transport.</p>
-              <p className="text-muted-foreground leading-relaxed mb-8">
-                Operating in Botswana's harsh mining and logistics corridors, Drivewise provides hauliers, insurers, and mining conglomerates with irrefutable oversight. We architected a complete ecosystem handling fleet tracking, fatigue monitoring, and rigorous driver certification. The platform eliminates compliance ambiguity, protecting assets, lives, and corporate liability in extreme environments.
-              </p>
-              <div className="grid grid-cols-2 gap-6 mb-8 py-6 border-y border-border/50">
-                <div>
-                  <span className="block text-sm text-muted-foreground mb-1">Sector</span>
-                  <span className="font-medium">Logistics & Mining</span>
+          {studies.map((s, i) => (
+            <motion.div
+              key={s.title}
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-100px" }}
+              transition={{ duration: 0.7 }}
+              className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24 items-center"
+            >
+              <div className={`${s.order === "left" ? "order-2 lg:order-1" : ""}`}>
+                <div className="inline-block px-3 py-1 bg-white/5 text-muted-foreground font-mono text-xs uppercase tracking-wider mb-6">
+                  {s.tag}
                 </div>
-                <div>
-                  <span className="block text-sm text-muted-foreground mb-1">Region</span>
-                  <span className="font-medium">Botswana, Southern Africa</span>
-                </div>
-              </div>
-              <button className="flex items-center text-primary font-medium hover:text-white transition-colors group">
-                Read full brief <ArrowRight className="ml-2 w-4 h-4 transform group-hover:translate-x-1 transition-transform" />
-              </button>
-            </div>
-            <div className="order-1 lg:order-2 relative aspect-[4/3] w-full overflow-hidden bg-secondary">
-              <img src="/images/drivewise.png" alt="Drivewise platform dashboard overlay on Botswana map" className="w-full h-full object-cover" />
-              <div className="absolute inset-0 border border-white/10 mix-blend-overlay"></div>
-            </div>
-          </motion.div>
-
-          {/* Secondary Case Study 1 */}
-          <motion.div 
-            initial={{ opacity: 0, y: 40 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 0.7 }}
-            className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24 items-center"
-          >
-            <div className="relative aspect-[4/3] w-full overflow-hidden bg-secondary">
-              <img src="/images/logistics-port.png" alt="Industrial port infrastructure" className="w-full h-full object-cover" />
-              <div className="absolute inset-0 border border-white/10 mix-blend-overlay"></div>
-            </div>
-            <div>
-              <div className="inline-block px-3 py-1 bg-white/5 text-muted-foreground font-mono text-xs uppercase tracking-wider mb-6">Confidential Client</div>
-              <h3 className="text-3xl md:text-4xl font-semibold mb-6">Port Operations Gateway</h3>
-              <p className="text-muted-foreground leading-relaxed mb-8">
-                A unified customs and clearance gateway for a major East African port authority. Replaced fragmented legacy systems with a secure, high-throughput platform that accelerated cargo processing by 40%. Delivered comprehensive audit trails and integration with national revenue services.
-              </p>
-              <div className="grid grid-cols-2 gap-6 mb-8 py-6 border-y border-border/50">
-                <div>
-                  <span className="block text-sm text-muted-foreground mb-1">Sector</span>
-                  <span className="font-medium">Maritime & Customs</span>
-                </div>
-                <div>
-                  <span className="block text-sm text-muted-foreground mb-1">Scope</span>
-                  <span className="font-medium">Architecture & Delivery</span>
+                <h3 className="text-3xl md:text-4xl font-semibold mb-4">{s.title}</h3>
+                <p className="text-xl text-foreground mb-4">{s.summary}</p>
+                <p className="text-muted-foreground leading-relaxed mb-8">{s.detail}</p>
+                <div className="grid grid-cols-2 gap-6 py-6 border-y border-border/50">
+                  <div>
+                    <span className="block text-sm text-muted-foreground mb-1">Sector</span>
+                    <span className="font-medium">{s.sector}</span>
+                  </div>
+                  <div>
+                    <span className="block text-sm text-muted-foreground mb-1">Scope</span>
+                    <span className="font-medium">{s.scope}</span>
+                  </div>
                 </div>
               </div>
-            </div>
-          </motion.div>
-
-          {/* Secondary Case Study 2 */}
-          <motion.div 
-            initial={{ opacity: 0, y: 40 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 0.7 }}
-            className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24 items-center"
-          >
-            <div className="order-2 lg:order-1">
-              <div className="inline-block px-3 py-1 bg-white/5 text-muted-foreground font-mono text-xs uppercase tracking-wider mb-6">Confidential Client</div>
-              <h3 className="text-3xl md:text-4xl font-semibold mb-6">Agritech Yield Predictor</h3>
-              <p className="text-muted-foreground leading-relaxed mb-8">
-                Machine learning pipeline and field-agent application deployed across 40,000 smallholder farms in West Africa. Engineered for offline-first functionality and low-bandwidth synchronization, allowing co-operatives to predict yields and secure forward financing before harvest.
-              </p>
-              <div className="grid grid-cols-2 gap-6 mb-8 py-6 border-y border-border/50">
-                <div>
-                  <span className="block text-sm text-muted-foreground mb-1">Sector</span>
-                  <span className="font-medium">Agriculture & Finance</span>
-                </div>
-                <div>
-                  <span className="block text-sm text-muted-foreground mb-1">Scope</span>
-                  <span className="font-medium">Data Strategy & Mobile</span>
-                </div>
+              <div
+                className={`relative aspect-[4/3] w-full overflow-hidden bg-secondary ${
+                  s.order === "left" ? "order-1 lg:order-2" : ""
+                }`}
+              >
+                <img src={s.image} alt={s.imageAlt} className="w-full h-full object-cover" />
+                <div className="absolute inset-0 border border-white/10 mix-blend-overlay" />
               </div>
-            </div>
-            <div className="order-1 lg:order-2 relative aspect-[4/3] w-full overflow-hidden bg-secondary">
-              <img src="/images/strategy-architecture.png" alt="Abstract data architecture" className="w-full h-full object-cover" />
-              <div className="absolute inset-0 border border-white/10 mix-blend-overlay"></div>
-            </div>
-          </motion.div>
+            </motion.div>
+          ))}
         </div>
       </div>
     </section>

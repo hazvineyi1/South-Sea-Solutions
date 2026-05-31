@@ -20,12 +20,12 @@ export function Markets() {
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
           >
-            <h2 className="text-3xl md:text-5xl font-semibold mb-6">Engineered for the edge.</h2>
+            <h2 className="text-3xl md:text-5xl font-semibold mb-6">Built for where it matters.</h2>
             <p className="text-muted-foreground text-lg leading-relaxed mb-8">
-              We focus on regions and sectors where software failure has severe consequences. Our platforms operate in low-bandwidth environments, integrate with fragmented legacy systems, and withstand rigorous regulatory scrutiny.
+              We work across sectors where complexity is structural and software failure has serious consequences. Our platforms integrate with legacy systems, withstand regulatory scrutiny, and perform reliably in varied operational conditions.
             </p>
             <div className="flex flex-wrap gap-3">
-              {['Africa', 'Emerging Markets', 'Logistics', 'Transport', 'Mining', 'Resource Sector', 'Fintech'].map((tag) => (
+              {['Transport', 'Logistics', 'Finance', 'Agriculture', 'Government', 'Resources', 'Healthcare', 'Maritime'].map((tag) => (
                 <span key={tag} className="px-4 py-2 border border-border text-sm font-medium tracking-wide">
                   {tag}
                 </span>

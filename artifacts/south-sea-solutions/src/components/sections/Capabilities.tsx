@@ -9,12 +9,12 @@ const capabilities = [
   {
     id: "02",
     title: "Product Design",
-    description: "Interfaces engineered for harsh environments and high-stakes operations. We design for clarity, speed, and zero ambiguity."
+    description: "Interfaces built for high-stakes operations. We design for clarity, speed, and zero ambiguity, regardless of the environment or user."
   },
   {
     id: "03",
     title: "Full-Stack Engineering",
-    description: "Scalable, secure, and resilient architecture. We build systems that perform reliably across continents and challenging infrastructure."
+    description: "Scalable, secure, and resilient architecture. We build systems that perform reliably across diverse infrastructure and user conditions."
   },
   {
     id: "04",

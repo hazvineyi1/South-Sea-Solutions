@@ -16,7 +16,7 @@ export function About() {
               "We believe that complex problems are solved by thinking deeply before acting, not by rushing to write code."
             </h2>
             <p className="text-muted-foreground text-lg leading-relaxed">
-              South Sea Solutions was founded on a simple premise: emerging markets need robust, uncompromising technology architecture. We do not offshore generic solutions. We build specific tools for specific environments, bringing Silicon Valley engineering standards to industrial, resource, and logistics sectors across the globe.
+              South Sea Solutions was founded on a simple premise: organisations facing genuinely hard problems deserve purpose-built tools, not adapted off-the-shelf software. We work selectively, embedding with clients who need a trusted partner rather than a vendor. Our work spans industries and geographies, and we bring the same disciplined approach to every engagement.
             </p>
           </motion.div>
         </div>
