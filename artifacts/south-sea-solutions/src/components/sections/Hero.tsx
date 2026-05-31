@@ -30,7 +30,6 @@ export function Hero() {
             }}
           >
             <motion.div variants={fadeInUp} className="flex items-center gap-4 mb-8">
-              <div className="w-12 h-[2px] bg-primary"></div>
               <span className="text-primary font-mono text-sm tracking-widest uppercase">South Sea Solutions</span>
             </motion.div>
             
