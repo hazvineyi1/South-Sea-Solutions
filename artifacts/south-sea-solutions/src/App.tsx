@@ -9,6 +9,8 @@ import Home from "@/pages/home";
 import LoginPage from "@/pages/portal/login";
 import CommandPage from "@/pages/portal/command";
 import FleetPage from "@/pages/portal/fleet";
+import TrainingPage from "@/pages/portal/training";
+import TrainingModulePage from "@/pages/portal/training-module";
 import DriverRecordPage from "@/pages/portal/driver-record";
 import DriverHomePage from "@/pages/portal/driver-home";
 
@@ -28,6 +30,16 @@ function Router() {
       <Route path="/portal/fleet">
         <RequireAuth roles={["OWNER", "OPERATOR"]}>
           <FleetPage />
+        </RequireAuth>
+      </Route>
+      <Route path="/portal/training">
+        <RequireAuth roles={["OWNER", "OPERATOR"]}>
+          <TrainingPage />
+        </RequireAuth>
+      </Route>
+      <Route path="/portal/training/:slug">
+        <RequireAuth roles={["OWNER", "OPERATOR"]}>
+          <TrainingModulePage />
         </RequireAuth>
       </Route>
       <Route path="/portal/me">

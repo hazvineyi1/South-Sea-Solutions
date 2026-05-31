@@ -33,6 +33,7 @@ A login-gated, multi-tenant portal hub built on the South Sea Solutions marketin
 - Hours-of-service engine: `artifacts/api-server/src/lib/hosEngine.ts`
 - Auth middleware: `artifacts/api-server/src/middlewares/requireAuth.ts` (`requireAuth`, `requireRole`)
 - Portal frontend: `artifacts/south-sea-solutions/src/portal/*` (auth context, guards, layout, ui) and `src/pages/portal/*` (login, fleet, driver-record, driver-home)
+- Training center: `src/pages/portal/trainingContent.ts` (static module content data), `training.tsx` (index, audience filter + category grouping), `training-module.tsx` (detail with sections/steps/callouts + prev/next). Routes `/portal/training` and `/portal/training/:slug`, guarded OWNER/OPERATOR; header "Training" link shown to OWNER/OPERATOR only.
 - Drivewise theme: scoped `.drivewise` class in `src/index.css`
 
 ## Architecture decisions

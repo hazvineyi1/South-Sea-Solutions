@@ -1,6 +1,6 @@
 import { type ReactNode } from "react";
 import { Link, useLocation } from "wouter";
-import { LogOut, Compass, ArrowLeft } from "lucide-react";
+import { LogOut, Compass, ArrowLeft, GraduationCap } from "lucide-react";
 import { useAuth, useLogout } from "./auth-hooks";
 import { Button } from "@/components/ui/button";
 
@@ -41,6 +41,15 @@ export function PortalLayout({ children }: { children: ReactNode }) {
 
           {user ? (
             <div className="flex items-center gap-3">
+              {user.role === "OWNER" || user.role === "OPERATOR" ? (
+                <Link
+                  href="/portal/training"
+                  className="hidden items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground sm:flex"
+                >
+                  <GraduationCap className="h-4 w-4" />
+                  Training
+                </Link>
+              ) : null}
               <Link
                 href="/"
                 className="hidden items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground sm:flex"
