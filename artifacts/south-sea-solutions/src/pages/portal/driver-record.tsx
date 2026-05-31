@@ -244,8 +244,8 @@ export default function DriverRecordPage() {
 
   return (
     <PortalLayout>
-      <Link href="/portal/fleet" className="mb-4 inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground">
-        <ArrowLeft className="h-4 w-4" /> Back to fleet
+      <Link href="/portal" className="mb-4 inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground">
+        <ArrowLeft className="h-4 w-4" /> Back to portal
       </Link>
       {isLoading ? (
         <div className="flex items-center justify-center py-20">
