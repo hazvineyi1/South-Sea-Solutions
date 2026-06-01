@@ -16,6 +16,7 @@ import {
   alertAcksTable,
   trainingModulesTable,
   trainingCompletionsTable,
+  contactMessagesTable,
 } from "@workspace/db";
 import app from "./app";
 import { hashPassword } from "./lib/auth";
@@ -44,6 +45,7 @@ const created = {
   fleetIds: new Set<string>(),
   vehicleIds: new Set<string>(),
   moduleIds: new Set<string>(),
+  messageIds: new Set<string>(),
 };
 
 async function makeOrg(name: string): Promise<string> {
@@ -106,7 +108,11 @@ afterAll(async () => {
   const fleetIds = [...created.fleetIds];
   const orgIds = [...created.orgIds];
   const moduleIds = [...created.moduleIds];
+  const messageIds = [...created.messageIds];
 
+  if (messageIds.length > 0) {
+    await db.delete(contactMessagesTable).where(inArray(contactMessagesTable.id, messageIds));
+  }
   if (userIds.length > 0) {
     await db.update(sessionsTable).set({ actingOrgId: null }).where(inArray(sessionsTable.actingOrgId, orgIds.length ? orgIds : ["00000000-0000-0000-0000-000000000000"]));
     await db.delete(trainingCompletionsTable).where(inArray(trainingCompletionsTable.userId, userIds));
@@ -143,6 +149,7 @@ describe("requireSuperadmin guards /platform/*", () => {
     { method: "get", path: "/api/platform/overview" },
     { method: "get", path: "/api/platform/orgs" },
     { method: "get", path: "/api/platform/training/modules" },
+    { method: "get", path: "/api/platform/messages" },
     { method: "post", path: "/api/platform/orgs", body: { name: "X", region: "Y" } },
   ];
 
@@ -422,5 +429,121 @@ describe("training module reorder", () => {
     const owner = await agentFor(ownerEmail);
     const res = await owner.post("/api/platform/training/reorder").send({ ids: [] });
     expect(res.status).toBe(403);
+  });
+});
+
+describe("contact messages", () => {
+  it("accepts a public submission, normalizes the fields, and stores it unread", async () => {
+    const submission = {
+      name: "  Tariro Banda  ",
+      organization: "  Kalahari Freight  ",
+      email: "Tariro@Example.COM",
+      message: "  We run 40 trucks and need help with HOS compliance.  ",
+    };
+
+    // No auth: the marketing form posts here directly.
+    const res = await request(app).post("/api/contact").send(submission);
+    expect(res.status).toBe(200);
+    expect(res.body.ok).toBe(true);
+
+    const rows = await db
+      .select()
+      .from(contactMessagesTable)
+      .where(eq(contactMessagesTable.email, "tariro@example.com"));
+    expect(rows.length).toBe(1);
+    const row = rows[0];
+    created.messageIds.add(row.id);
+
+    // Fields are trimmed and the email is lowercased before storage.
+    expect(row.name).toBe("Tariro Banda");
+    expect(row.organization).toBe("Kalahari Freight");
+    expect(row.email).toBe("tariro@example.com");
+    expect(row.message).toBe("We run 40 trucks and need help with HOS compliance.");
+    // A fresh inquiry is unread.
+    expect(row.read).toBe(false);
+  });
+
+  it("stores a blank organization as null", async () => {
+    const res = await request(app)
+      .post("/api/contact")
+      .send({ name: "No Org", email: `noorg.${RUN_TAG}@example.com`, message: "Hello there." });
+    expect(res.status).toBe(200);
+
+    const [row] = await db
+      .select()
+      .from(contactMessagesTable)
+      .where(eq(contactMessagesTable.email, `noorg.${RUN_TAG}@example.com`));
+    expect(row).toBeTruthy();
+    created.messageIds.add(row.id);
+    expect(row.organization).toBeNull();
+  });
+
+  it("rejects an invalid submission with 400 and stores nothing", async () => {
+    const before = (await db.select().from(contactMessagesTable)).length;
+    // Missing message and an empty name: both violate the contract.
+    const res = await request(app).post("/api/contact").send({ name: "", email: "bad" });
+    expect(res.status).toBe(400);
+    const after = (await db.select().from(contactMessagesTable)).length;
+    expect(after).toBe(before);
+  });
+
+  async function seedMessage(local: string): Promise<string> {
+    const [row] = await db
+      .insert(contactMessagesTable)
+      .values({
+        name: `Seeded ${local}`,
+        email: tagEmail(local),
+        message: "Seeded inquiry body.",
+      })
+      .returning();
+    created.messageIds.add(row.id);
+    return row.id;
+  }
+
+  it("lets a superadmin list, mark read/unread, and delete inquiries", async () => {
+    const id = await seedMessage("manage");
+    const sa = await agentFor(superEmail);
+
+    // List: the seeded message is present and starts unread.
+    const list = await sa.get("/api/platform/messages");
+    expect(list.status).toBe(200);
+    const listed = list.body.find((m: { id: string }) => m.id === id);
+    expect(listed).toBeTruthy();
+    expect(listed.read).toBe(false);
+
+    // Mark read.
+    const read = await sa.patch(`/api/platform/messages/${id}`).send({ read: true });
+    expect(read.status).toBe(200);
+    expect(read.body.read).toBe(true);
+
+    // Mark unread again.
+    const unread = await sa.patch(`/api/platform/messages/${id}`).send({ read: false });
+    expect(unread.status).toBe(200);
+    expect(unread.body.read).toBe(false);
+
+    // Delete: the row is gone from the database.
+    const del = await sa.delete(`/api/platform/messages/${id}`);
+    expect(del.status).toBe(204);
+    expect((await db.select().from(contactMessagesTable).where(eq(contactMessagesTable.id, id))).length).toBe(0);
+    created.messageIds.delete(id);
+  });
+
+  it("returns 404 when updating a message that does not exist", async () => {
+    const sa = await agentFor(superEmail);
+    const res = await sa.patch(`/api/platform/messages/${randomUUID()}`).send({ read: true });
+    expect(res.status).toBe(404);
+  });
+
+  it("forbids an OWNER from managing messages", async () => {
+    const id = await seedMessage("owner-blocked");
+    const owner = await agentFor(ownerEmail);
+
+    expect((await owner.get("/api/platform/messages")).status).toBe(403);
+    expect((await owner.patch(`/api/platform/messages/${id}`).send({ read: true })).status).toBe(403);
+    expect((await owner.delete(`/api/platform/messages/${id}`)).status).toBe(403);
+
+    // The message is untouched: still present and unread.
+    const [row] = await db.select().from(contactMessagesTable).where(eq(contactMessagesTable.id, id));
+    expect(row.read).toBe(false);
   });
 });
