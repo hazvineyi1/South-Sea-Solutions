@@ -251,6 +251,57 @@ describe("impersonation: effective role vs real role", () => {
   });
 });
 
+describe("password reset auditing", () => {
+  it("writes a RESET_PASSWORD audit row (actor, target, timestamp) without storing the password", async () => {
+    const target = await makeUser({ local: "reset-target", role: "DRIVER", orgId: primaryOrgId });
+    const newPassword = "Brandnewpass2026";
+
+    const sa = await agentFor(superEmail);
+    const res = await sa.patch(`/api/platform/users/${target.id}`).send({ password: newPassword });
+    expect(res.status).toBe(200);
+
+    const rows = await db
+      .select()
+      .from(auditLogsTable)
+      .where(
+        and(
+          eq(auditLogsTable.orgId, primaryOrgId),
+          eq(auditLogsTable.action, "RESET_PASSWORD"),
+          eq(auditLogsTable.subjectId, target.id),
+        ),
+      );
+    expect(rows.length).toBe(1);
+    expect(rows[0].subjectType).toBe("user");
+    // The audit row must never carry the plaintext password anywhere.
+    const serialized = JSON.stringify(rows[0]);
+    expect(serialized).not.toContain(newPassword);
+
+    // The reset actually took effect: the target can log in with the new password.
+    const agent = request.agent(app);
+    const login = await agent.post("/api/auth/login").send({ email: target.email, password: newPassword });
+    expect(login.status).toBe(200);
+  });
+
+  it("does not write a RESET_PASSWORD row when no password is supplied", async () => {
+    const target = await makeUser({ local: "no-reset", role: "DRIVER", orgId: primaryOrgId });
+
+    const sa = await agentFor(superEmail);
+    const res = await sa.patch(`/api/platform/users/${target.id}`).send({ name: "Renamed" });
+    expect(res.status).toBe(200);
+
+    const rows = await db
+      .select()
+      .from(auditLogsTable)
+      .where(
+        and(
+          eq(auditLogsTable.action, "RESET_PASSWORD"),
+          eq(auditLogsTable.subjectId, target.id),
+        ),
+      );
+    expect(rows.length).toBe(0);
+  });
+});
+
 describe("org cascade delete", () => {
   it("removes the org and all of its child rows in one transaction", async () => {
     const orgId = await makeOrg("Cascade Co");

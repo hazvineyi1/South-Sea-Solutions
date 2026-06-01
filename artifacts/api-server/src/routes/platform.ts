@@ -342,6 +342,17 @@ router.patch("/platform/users/:id", ...consoleGuards, async (req, res): Promise<
     res.status(404).json({ error: "User not found" });
     return;
   }
+  // A password reset is sensitive, so record who did it and when. We never store
+  // the plaintext password (or its hash): only the actor, target and a timestamp.
+  if (password !== undefined && user.orgId) {
+    await db.insert(auditLogsTable).values({
+      orgId: user.orgId,
+      actorUserId: req.auth!.userId,
+      action: "RESET_PASSWORD",
+      subjectType: "user",
+      subjectId: user.id,
+    });
+  }
   res.json(
     UpdatePlatformUserResponse.parse({
       id: user.id,
