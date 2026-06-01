@@ -628,6 +628,29 @@ paths:
       responses:
         "204":
           description: Deleted
+  /platform/audit-logs:
+    get:
+      operationId: getPlatformAuditLogs
+      tags: [platform]
+      summary: List recent audit-log entries across all organizations
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          description: Maximum number of entries to return (1 to 200).
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 200
+      responses:
+        "200":
+          description: Audit-log entries, newest first
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AuditLogEntry"
 components:
   schemas:
     HealthStatus:
@@ -689,6 +712,35 @@ components:
       properties:
         read:
           type: boolean
+    AuditLogEntry:
+      type: object
+      required:
+        - id
+        - orgId
+        - actorUserId
+        - action
+        - subjectType
+        - subjectId
+        - at
+      properties:
+        id:
+          type: string
+        orgId:
+          type: string
+        orgName:
+          type: ["string", "null"]
+        actorUserId:
+          type: string
+        actorEmail:
+          type: ["string", "null"]
+        action:
+          type: string
+        subjectType:
+          type: string
+        subjectId:
+          type: string
+        at:
+          type: string
     LoginInput:
       type: object
       required: [email, password]

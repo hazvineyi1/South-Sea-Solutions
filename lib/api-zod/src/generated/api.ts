@@ -755,3 +755,28 @@ export const DeletePlatformMessageParams = zod.object({
 })
 
 
+/**
+ * @summary List recent audit-log entries across all organizations
+ */
+export const getPlatformAuditLogsQueryLimitMax = 200;
+
+
+
+export const GetPlatformAuditLogsQueryParams = zod.object({
+  "limit": zod.coerce.number().min(1).max(getPlatformAuditLogsQueryLimitMax).optional().describe('Maximum number of entries to return (1 to 200).')
+})
+
+export const GetPlatformAuditLogsResponseItem = zod.object({
+  "id": zod.string(),
+  "orgId": zod.string(),
+  "orgName": zod.string().nullish(),
+  "actorUserId": zod.string(),
+  "actorEmail": zod.string().nullish(),
+  "action": zod.string(),
+  "subjectType": zod.string(),
+  "subjectId": zod.string(),
+  "at": zod.string()
+})
+export const GetPlatformAuditLogsResponse = zod.array(GetPlatformAuditLogsResponseItem)
+
+

@@ -17,6 +17,7 @@ import ConsoleOrgsPage from "@/pages/console/orgs";
 import ConsoleOrgDetailPage from "@/pages/console/org-detail";
 import ConsoleTrainingPage from "@/pages/console/training";
 import ConsoleMessagesPage from "@/pages/console/messages";
+import ConsoleAuditLogsPage from "@/pages/console/audit-logs";
 
 const queryClient = new QueryClient();
 
@@ -80,6 +81,11 @@ function Router() {
       <Route path="/console/messages">
         <RequireSuperadmin>
           <ConsoleMessagesPage />
+        </RequireSuperadmin>
+      </Route>
+      <Route path="/console/audit-logs">
+        <RequireSuperadmin>
+          <ConsoleAuditLogsPage />
         </RequireSuperadmin>
       </Route>
       <Route component={NotFound} />

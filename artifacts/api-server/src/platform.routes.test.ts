@@ -150,6 +150,7 @@ describe("requireSuperadmin guards /platform/*", () => {
     { method: "get", path: "/api/platform/orgs" },
     { method: "get", path: "/api/platform/training/modules" },
     { method: "get", path: "/api/platform/messages" },
+    { method: "get", path: "/api/platform/audit-logs" },
     { method: "post", path: "/api/platform/orgs", body: { name: "X", region: "Y" } },
   ];
 
@@ -545,5 +546,53 @@ describe("contact messages", () => {
     // The message is untouched: still present and unread.
     const [row] = await db.select().from(contactMessagesTable).where(eq(contactMessagesTable.id, id));
     expect(row.read).toBe(false);
+  });
+});
+
+describe("audit-log surfacing", () => {
+  it("returns recent entries newest first, joining org name and actor email", async () => {
+    // A password reset writes a RESET_PASSWORD audit row against the org.
+    const target = await makeUser({ local: "audit-surface", role: "DRIVER", orgId: primaryOrgId });
+    const sa = await agentFor(superEmail);
+    const reset = await sa.patch(`/api/platform/users/${target.id}`).send({ password: "Freshpass2026x" });
+    expect(reset.status).toBe(200);
+
+    const res = await sa.get("/api/platform/audit-logs");
+    expect(res.status).toBe(200);
+    expect(Array.isArray(res.body)).toBe(true);
+
+    const entry = res.body.find(
+      (e: { action: string; subjectId: string }) =>
+        e.action === "RESET_PASSWORD" && e.subjectId === target.id,
+    );
+    expect(entry).toBeTruthy();
+    expect(entry.orgId).toBe(primaryOrgId);
+    // The join surfaces the org name and the actor (superadmin) email.
+    expect(typeof entry.orgName).toBe("string");
+    expect(entry.actorEmail).toBe(superEmail);
+    expect(entry.subjectType).toBe("user");
+    expect(typeof entry.at).toBe("string");
+
+    // Newest first: the timestamps are non-increasing down the list.
+    const times = res.body.map((e: { at: string }) => new Date(e.at).getTime());
+    for (let i = 1; i < times.length; i++) {
+      expect(times[i - 1]).toBeGreaterThanOrEqual(times[i]);
+    }
+  });
+
+  it("honors the limit query param and caps it at 200", async () => {
+    const sa = await agentFor(superEmail);
+
+    const limited = await sa.get("/api/platform/audit-logs?limit=1");
+    expect(limited.status).toBe(200);
+    expect(limited.body.length).toBeLessThanOrEqual(1);
+
+    // Above the max is rejected by the generated query-param schema.
+    const tooBig = await sa.get("/api/platform/audit-logs?limit=500");
+    expect(tooBig.status).toBe(400);
+
+    // Zero is below the minimum and also rejected.
+    const tooSmall = await sa.get("/api/platform/audit-logs?limit=0");
+    expect(tooSmall.status).toBe(400);
   });
 });
