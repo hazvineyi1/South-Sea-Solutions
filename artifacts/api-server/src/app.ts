@@ -8,6 +8,8 @@ import router from "./routes";
 import { logger } from "./lib/logger";
 import { attachUser } from "./middlewares/requireAuth";
 
+// Single-service deploy: this server hosts both the /api routes and the built
+// frontend (see static serving below). Deployed on Railway with Node 22.
 const app: Express = express();
 
 app.use(
