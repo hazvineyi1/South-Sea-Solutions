@@ -39,6 +39,13 @@ app.use(attachUser);
 
 app.use("/api", router);
 
+// Any unmatched /api path returns the standard JSON error shape
+// (ApiErrorMessage), not Express's default HTML 404, so API clients always get
+// JSON. This must sit after the router and before the SPA fallback below.
+app.use("/api", (_req, res) => {
+  res.status(404).json({ error: "Not found" });
+});
+
 // Serve the built frontend (single-service deploy). The web app builds to
 // artifacts/south-sea-solutions/dist/public; the API bundle runs from
 // artifacts/api-server/dist, so the default path is two levels up. Override

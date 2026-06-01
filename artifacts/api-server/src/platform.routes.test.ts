@@ -185,6 +185,15 @@ describe("requireSuperadmin guards /platform/*", () => {
   });
 });
 
+describe("unmatched /api routes", () => {
+  it("returns a JSON 404 (ApiErrorMessage), not HTML", async () => {
+    const res = await request(app).get("/api/does-not-exist");
+    expect(res.status).toBe(404);
+    expect(res.headers["content-type"]).toMatch(/application\/json/);
+    expect(typeof res.body.error).toBe("string");
+  });
+});
+
 describe("impersonation: effective role vs real role", () => {
   it("an OWNER cannot reach platform endpoints (no console with an owner role)", async () => {
     const owner = await agentFor(ownerEmail);
