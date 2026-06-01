@@ -42,6 +42,20 @@ export interface PlatformMessageUpdate {
   read: boolean;
 }
 
+export interface AuditLogEntry {
+  id: string;
+  orgId: string;
+  /** @nullable */
+  orgName?: string | null;
+  actorUserId: string;
+  /** @nullable */
+  actorEmail?: string | null;
+  action: string;
+  subjectType: string;
+  subjectId: string;
+  at: string;
+}
+
 export interface LoginInput {
   /** @minLength 1 */
   email: string;
@@ -424,4 +438,13 @@ export interface EnterOrgInput {
   /** @minLength 1 */
   orgId: string;
 }
+
+export type GetPlatformAuditLogsParams = {
+/**
+ * Maximum number of entries to return (1 to 200).
+ * @minimum 1
+ * @maximum 200
+ */
+limit?: number;
+};
 

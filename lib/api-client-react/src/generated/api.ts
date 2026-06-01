@@ -23,6 +23,7 @@ import type {
   Alert,
   AlertAckInput,
   ApiErrorMessage,
+  AuditLogEntry,
   AuthUser,
   ContactMessage,
   ContactMessageInput,
@@ -30,6 +31,7 @@ import type {
   DriverRecord,
   EnterOrgInput,
   FleetSummary,
+  GetPlatformAuditLogsParams,
   HealthStatus,
   LoginInput,
   OrgProfile,
@@ -2635,4 +2637,88 @@ export const useDeletePlatformMessage = <TError = ErrorType<unknown>,
       > => {
       return useMutation(getDeletePlatformMessageMutationOptions(options));
     }
+
+export const getGetPlatformAuditLogsUrl = (params?: GetPlatformAuditLogsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/platform/audit-logs?${stringifiedParams}` : `/api/platform/audit-logs`
+}
+
+/**
+ * @summary List recent audit-log entries across all organizations
+ */
+export const getPlatformAuditLogs = async (params?: GetPlatformAuditLogsParams, options?: RequestInit): Promise<AuditLogEntry[]> => {
+
+  return customFetch<AuditLogEntry[]>(getGetPlatformAuditLogsUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetPlatformAuditLogsQueryKey = (params?: GetPlatformAuditLogsParams,) => {
+    return [
+    `/api/platform/audit-logs`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetPlatformAuditLogsQueryOptions = <TData = Awaited<ReturnType<typeof getPlatformAuditLogs>>, TError = ErrorType<unknown>>(params?: GetPlatformAuditLogsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getPlatformAuditLogs>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetPlatformAuditLogsQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getPlatformAuditLogs>>> = ({ signal }) => getPlatformAuditLogs(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getPlatformAuditLogs>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetPlatformAuditLogsQueryResult = NonNullable<Awaited<ReturnType<typeof getPlatformAuditLogs>>>
+export type GetPlatformAuditLogsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary List recent audit-log entries across all organizations
+ */
+
+export function useGetPlatformAuditLogs<TData = Awaited<ReturnType<typeof getPlatformAuditLogs>>, TError = ErrorType<unknown>>(
+ params?: GetPlatformAuditLogsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getPlatformAuditLogs>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetPlatformAuditLogsQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
 

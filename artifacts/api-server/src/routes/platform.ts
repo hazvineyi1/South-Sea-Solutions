@@ -23,6 +23,8 @@ import {
   trainingModulesTable,
   trainingCompletionsTable,
   contactMessagesTable,
+  getRecentAuditLogs,
+  DEFAULT_AUDIT_LOG_LIMIT,
 } from "@workspace/db";
 import {
   GetPlatformOverviewResponse,
@@ -57,6 +59,8 @@ import {
   UpdatePlatformMessageBody,
   UpdatePlatformMessageResponse,
   DeletePlatformMessageParams,
+  GetPlatformAuditLogsQueryParams,
+  GetPlatformAuditLogsResponse,
 } from "@workspace/api-zod";
 import { requireAuth, requireSuperadmin, requireConsole } from "../middlewares/requireAuth";
 import { hashPassword, setActingOrg } from "../lib/auth";
@@ -524,6 +528,31 @@ router.delete("/platform/messages/:id", ...consoleGuards, async (req, res): Prom
   }
   await db.delete(contactMessagesTable).where(eq(contactMessagesTable.id, params.data.id));
   res.sendStatus(204);
+});
+
+router.get("/platform/audit-logs", ...consoleGuards, async (req, res): Promise<void> => {
+  const query = GetPlatformAuditLogsQueryParams.safeParse(req.query);
+  if (!query.success) {
+    res.status(400).json({ error: query.error.message });
+    return;
+  }
+  const limit = query.data.limit ?? DEFAULT_AUDIT_LOG_LIMIT;
+  const rows = await getRecentAuditLogs(limit);
+  res.json(
+    GetPlatformAuditLogsResponse.parse(
+      rows.map((r) => ({
+        id: r.id,
+        orgId: r.orgId,
+        orgName: r.orgName,
+        actorUserId: r.actorUserId,
+        actorEmail: r.actorEmail,
+        action: r.action,
+        subjectType: r.subjectType,
+        subjectId: r.subjectId,
+        at: r.at.toISOString(),
+      })),
+    ),
+  );
 });
 
 router.post("/platform/enter-org", ...guards, async (req, res): Promise<void> => {

@@ -9,6 +9,7 @@
 export * from './alert';
 export * from './alertAckInput';
 export * from './apiErrorMessage';
+export * from './auditLogEntry';
 export * from './authUser';
 export * from './certificationInfo';
 export * from './clock';
@@ -20,6 +21,7 @@ export * from './documentItem';
 export * from './driverRecord';
 export * from './enterOrgInput';
 export * from './fleetSummary';
+export * from './getPlatformAuditLogsParams';
 export * from './healthStatus';
 export * from './hosClocks';
 export * from './incidentItem';

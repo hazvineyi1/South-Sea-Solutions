@@ -1,6 +1,6 @@
 import { type ReactNode } from "react";
 import { Link, useLocation } from "wouter";
-import { LayoutDashboard, Building2, GraduationCap, LogOut, ShieldCheck, BookOpen, Mail } from "lucide-react";
+import { LayoutDashboard, Building2, GraduationCap, LogOut, ShieldCheck, BookOpen, Mail, ScrollText } from "lucide-react";
 import { useAuth, useLogout } from "./auth-hooks";
 import { Button } from "@/components/ui/button";
 
@@ -9,6 +9,7 @@ const NAV = [
   { href: "/console/orgs", label: "Organizations", icon: Building2, exact: false },
   { href: "/console/training", label: "Training content", icon: GraduationCap, exact: false },
   { href: "/console/messages", label: "Messages", icon: Mail, exact: false },
+  { href: "/console/audit-logs", label: "Audit log", icon: ScrollText, exact: false },
 ] as const;
 
 function isActive(current: string, href: string, exact: boolean): boolean {
