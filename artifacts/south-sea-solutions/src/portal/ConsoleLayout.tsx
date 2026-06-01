@@ -9,7 +9,7 @@ const NAV = [
   { href: "/console/orgs", label: "Organizations", icon: Building2, exact: false },
   { href: "/console/training", label: "Training content", icon: GraduationCap, exact: false },
   { href: "/console/messages", label: "Messages", icon: Mail, exact: false },
-  { href: "/console/audit-logs", label: "Audit log", icon: ScrollText, exact: false },
+  { href: "/console/audit-logs", label: "Audit Logs", icon: ScrollText, exact: false },
 ] as const;
 
 function isActive(current: string, href: string, exact: boolean): boolean {
