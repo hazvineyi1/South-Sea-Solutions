@@ -595,4 +595,36 @@ describe("audit-log surfacing", () => {
     const tooSmall = await sa.get("/api/platform/audit-logs?limit=0");
     expect(tooSmall.status).toBe(400);
   });
+
+  it("returns 200 with an array for a real superadmin", async () => {
+    const sa = await agentFor(superEmail);
+    const res = await sa.get("/api/platform/audit-logs");
+    expect(res.status).toBe(200);
+    expect(Array.isArray(res.body)).toBe(true);
+  });
+
+  it("returns 403 for an OWNER", async () => {
+    const owner = await agentFor(ownerEmail);
+    const res = await owner.get("/api/platform/audit-logs");
+    expect(res.status).toBe(403);
+  });
+
+  it("returns 403 for a superadmin who is currently impersonating an org", async () => {
+    // requireConsole rejects a real superadmin while they are impersonating:
+    // the cross-org audit log must not be reachable until they exit the org.
+    const sa = await agentFor(superEmail);
+
+    const enter = await sa.post("/api/platform/enter-org").send({ orgId: primaryOrgId });
+    expect(enter.status).toBe(200);
+    expect(enter.body.impersonating).toBe(true);
+
+    const res = await sa.get("/api/platform/audit-logs");
+    expect(res.status).toBe(403);
+
+    // Exiting restores access, confirming the 403 was due to impersonation.
+    const exit = await sa.post("/api/platform/exit-org").send({});
+    expect(exit.status).toBe(200);
+    const after = await sa.get("/api/platform/audit-logs");
+    expect(after.status).toBe(200);
+  });
 });
