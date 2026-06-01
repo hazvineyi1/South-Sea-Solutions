@@ -1,0 +1,13 @@
+{
+  "$schema": "https://railway.com/railway.schema.json",
+  "build": {
+    "builder": "NIXPACKS",
+    "buildCommand": "BASE_PATH=/ PORT=8080 pnpm --filter @workspace/south-sea-solutions run build && pnpm --filter @workspace/api-server run build"
+  },
+  "deploy": {
+    "preDeployCommand": "pnpm --filter @workspace/db run push",
+    "startCommand": "node --enable-source-maps artifacts/api-server/dist/index.mjs",
+    "healthcheckPath": "/api/healthz",
+    "restartPolicyType": "ON_FAILURE"
+  }
+}
