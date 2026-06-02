@@ -780,3 +780,704 @@ export const GetPlatformAuditLogsResponseItem = zod.object({
 export const GetPlatformAuditLogsResponse = zod.array(GetPlatformAuditLogsResponseItem)
 
 
+/**
+ * @summary Unified fleet intelligence overview
+ */
+export const GetTelematicsOverviewResponse = zod.object({
+  "healthScore": zod.number(),
+  "safetyScore": zod.number(),
+  "efficiencyScore": zod.number(),
+  "complianceScore": zod.number(),
+  "utilizationPct": zod.number(),
+  "openAlerts": zod.number(),
+  "activeFaults": zod.number(),
+  "dueServices": zod.number(),
+  "geofenceBreaches": zod.number(),
+  "openJobs": zod.number(),
+  "scorecards": zod.array(zod.object({
+  "label": zod.string(),
+  "score": zod.number(),
+  "delta": zod.number().describe('Change versus the prior period (positive is better).'),
+  "unit": zod.string()
+})),
+  "insights": zod.array(zod.object({
+  "id": zod.string(),
+  "severity": zod.string(),
+  "title": zod.string(),
+  "detail": zod.string(),
+  "area": zod.string(),
+  "driverId": zod.string().nullish(),
+  "vehicleId": zod.string().nullish()
+}))
+})
+
+
+/**
+ * @summary Engine health and diagnostics for every active vehicle
+ */
+export const GetVehicleHealthRowsResponseItem = zod.object({
+  "vehicleId": zod.string(),
+  "reg": zod.string(),
+  "driverName": zod.string(),
+  "healthScore": zod.number(),
+  "milOn": zod.boolean(),
+  "engineTempC": zod.number().nullish(),
+  "batteryV": zod.number().nullish(),
+  "oilLifePct": zod.number().nullish(),
+  "defLevelPct": zod.number().nullish(),
+  "tirePressureKpa": zod.number().nullish(),
+  "engineHours": zod.number().nullish(),
+  "activeFaults": zod.number(),
+  "nextServiceInKm": zod.number().nullish(),
+  "nextServiceInDays": zod.number().nullish(),
+  "recordedAt": zod.string().nullish()
+})
+export const GetVehicleHealthRowsResponse = zod.array(GetVehicleHealthRowsResponseItem)
+
+
+/**
+ * @summary Full engine diagnostics for one vehicle
+ */
+export const GetVehicleHealthDetailParams = zod.object({
+  "vehicleId": zod.coerce.string()
+})
+
+export const GetVehicleHealthDetailResponse = zod.object({
+  "vehicleId": zod.string(),
+  "reg": zod.string(),
+  "driverName": zod.string(),
+  "healthScore": zod.number(),
+  "milOn": zod.boolean(),
+  "engineTempC": zod.number().nullish(),
+  "coolantTempC": zod.number().nullish(),
+  "oilPressureKpa": zod.number().nullish(),
+  "oilLifePct": zod.number().nullish(),
+  "batteryV": zod.number().nullish(),
+  "tirePressureKpa": zod.number().nullish(),
+  "engineHours": zod.number().nullish(),
+  "defLevelPct": zod.number().nullish(),
+  "odometerKm": zod.number().nullish(),
+  "recordedAt": zod.string().nullish(),
+  "faults": zod.array(zod.object({
+  "id": zod.string(),
+  "code": zod.string(),
+  "description": zod.string(),
+  "system": zod.string(),
+  "severity": zod.string(),
+  "active": zod.boolean(),
+  "occurredAt": zod.string()
+})),
+  "plans": zod.array(zod.object({
+  "planId": zod.string(),
+  "name": zod.string(),
+  "vehicleId": zod.string(),
+  "vehicleReg": zod.string(),
+  "state": zod.string().describe('VALID, DUE_SOON or OVERDUE.'),
+  "dueInKm": zod.number().nullish(),
+  "dueInDays": zod.number().nullish(),
+  "lastServiceOn": zod.string().nullish()
+}))
+})
+
+
+/**
+ * @summary List geofences
+ */
+export const GetGeofencesResponseItem = zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "kind": zod.string(),
+  "centerLat": zod.number(),
+  "centerLng": zod.number(),
+  "radiusM": zod.number(),
+  "active": zod.boolean()
+})
+export const GetGeofencesResponse = zod.array(GetGeofencesResponseItem)
+
+
+/**
+ * @summary Create a geofence
+ */
+
+export const createGeofenceBodyRadiusMMin = 50;
+
+
+
+export const CreateGeofenceBody = zod.object({
+  "name": zod.string().min(1),
+  "kind": zod.enum(['DEPOT', 'CORRIDOR', 'BORDER', 'CUSTOMER', 'NOGO']),
+  "centerLat": zod.number(),
+  "centerLng": zod.number(),
+  "radiusM": zod.number().min(createGeofenceBodyRadiusMMin),
+  "active": zod.boolean().optional()
+})
+
+export const CreateGeofenceResponse = zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "kind": zod.string(),
+  "centerLat": zod.number(),
+  "centerLng": zod.number(),
+  "radiusM": zod.number(),
+  "active": zod.boolean()
+})
+
+
+/**
+ * @summary Update a geofence
+ */
+export const UpdateGeofenceParams = zod.object({
+  "id": zod.coerce.string()
+})
+
+
+export const updateGeofenceBodyRadiusMMin = 50;
+
+
+
+export const UpdateGeofenceBody = zod.object({
+  "name": zod.string().min(1).optional(),
+  "kind": zod.enum(['DEPOT', 'CORRIDOR', 'BORDER', 'CUSTOMER', 'NOGO']).optional(),
+  "centerLat": zod.number().optional(),
+  "centerLng": zod.number().optional(),
+  "radiusM": zod.number().min(updateGeofenceBodyRadiusMMin).optional(),
+  "active": zod.boolean().optional()
+})
+
+export const UpdateGeofenceResponse = zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "kind": zod.string(),
+  "centerLat": zod.number(),
+  "centerLng": zod.number(),
+  "radiusM": zod.number(),
+  "active": zod.boolean()
+})
+
+
+/**
+ * @summary Delete a geofence
+ */
+export const DeleteGeofenceParams = zod.object({
+  "id": zod.coerce.string()
+})
+
+
+/**
+ * @summary Recent geofence crossings
+ */
+export const GetGeofenceEventsResponseItem = zod.object({
+  "id": zod.string(),
+  "geofenceName": zod.string(),
+  "geofenceKind": zod.string(),
+  "driverId": zod.string(),
+  "driverName": zod.string(),
+  "vehicleReg": zod.string(),
+  "type": zod.string(),
+  "recordedAt": zod.string()
+})
+export const GetGeofenceEventsResponse = zod.array(GetGeofenceEventsResponseItem)
+
+
+/**
+ * @summary Driver behaviour leaderboard and recent events
+ */
+export const GetBehaviorOverviewResponse = zod.object({
+  "fleetScore": zod.number(),
+  "totalEvents": zod.number(),
+  "drivers": zod.array(zod.object({
+  "driverId": zod.string(),
+  "driverName": zod.string(),
+  "behaviorScore": zod.number(),
+  "eventCount": zod.number(),
+  "harshEvents": zod.number(),
+  "speedingEvents": zod.number(),
+  "idleEvents": zod.number(),
+  "distractionEvents": zod.number()
+})),
+  "recent": zod.array(zod.object({
+  "id": zod.string(),
+  "driverId": zod.string(),
+  "driverName": zod.string(),
+  "vehicleReg": zod.string(),
+  "type": zod.string(),
+  "severity": zod.string(),
+  "value": zod.number().nullish(),
+  "placeLabel": zod.string().nullish(),
+  "recordedAt": zod.string()
+})),
+  "byType": zod.array(zod.object({
+  "type": zod.string(),
+  "count": zod.number()
+}))
+})
+
+
+/**
+ * @summary Maintenance due list and work orders
+ */
+export const GetMaintenanceBoardResponse = zod.object({
+  "overdue": zod.number(),
+  "dueSoon": zod.number(),
+  "openWorkOrders": zod.number(),
+  "due": zod.array(zod.object({
+  "planId": zod.string(),
+  "name": zod.string(),
+  "vehicleId": zod.string(),
+  "vehicleReg": zod.string(),
+  "state": zod.string().describe('VALID, DUE_SOON or OVERDUE.'),
+  "dueInKm": zod.number().nullish(),
+  "dueInDays": zod.number().nullish(),
+  "lastServiceOn": zod.string().nullish()
+})),
+  "workOrders": zod.array(zod.object({
+  "id": zod.string(),
+  "vehicleId": zod.string(),
+  "vehicleReg": zod.string(),
+  "title": zod.string(),
+  "detail": zod.string().nullish(),
+  "status": zod.string(),
+  "priority": zod.string(),
+  "dueOn": zod.string().nullish(),
+  "dueKm": zod.number().nullish(),
+  "costEstimate": zod.number().nullish(),
+  "createdAt": zod.string(),
+  "completedOn": zod.string().nullish()
+}))
+})
+
+
+/**
+ * @summary Create a work order
+ */
+
+
+
+
+export const CreateWorkOrderBody = zod.object({
+  "vehicleId": zod.string().min(1),
+  "title": zod.string().min(1),
+  "detail": zod.string().optional(),
+  "priority": zod.enum(['LOW', 'MEDIUM', 'HIGH']).optional(),
+  "dueOn": zod.string().optional(),
+  "dueKm": zod.number().optional(),
+  "costEstimate": zod.number().optional()
+})
+
+export const CreateWorkOrderResponse = zod.object({
+  "id": zod.string(),
+  "vehicleId": zod.string(),
+  "vehicleReg": zod.string(),
+  "title": zod.string(),
+  "detail": zod.string().nullish(),
+  "status": zod.string(),
+  "priority": zod.string(),
+  "dueOn": zod.string().nullish(),
+  "dueKm": zod.number().nullish(),
+  "costEstimate": zod.number().nullish(),
+  "createdAt": zod.string(),
+  "completedOn": zod.string().nullish()
+})
+
+
+/**
+ * @summary Update a work order
+ */
+export const UpdateWorkOrderParams = zod.object({
+  "id": zod.coerce.string()
+})
+
+
+
+
+export const UpdateWorkOrderBody = zod.object({
+  "title": zod.string().min(1).optional(),
+  "detail": zod.string().optional(),
+  "status": zod.enum(['OPEN', 'IN_PROGRESS', 'DONE', 'CANCELLED']).optional(),
+  "priority": zod.enum(['LOW', 'MEDIUM', 'HIGH']).optional(),
+  "dueOn": zod.string().optional(),
+  "dueKm": zod.number().optional(),
+  "costEstimate": zod.number().optional()
+})
+
+export const UpdateWorkOrderResponse = zod.object({
+  "id": zod.string(),
+  "vehicleId": zod.string(),
+  "vehicleReg": zod.string(),
+  "title": zod.string(),
+  "detail": zod.string().nullish(),
+  "status": zod.string(),
+  "priority": zod.string(),
+  "dueOn": zod.string().nullish(),
+  "dueKm": zod.number().nullish(),
+  "costEstimate": zod.number().nullish(),
+  "createdAt": zod.string(),
+  "completedOn": zod.string().nullish()
+})
+
+
+/**
+ * @summary List dispatch jobs
+ */
+export const GetDispatchJobsResponseItem = zod.object({
+  "id": zod.string(),
+  "reference": zod.string(),
+  "driverId": zod.string().nullish(),
+  "driverName": zod.string().nullish(),
+  "vehicleId": zod.string().nullish(),
+  "vehicleReg": zod.string().nullish(),
+  "origin": zod.string(),
+  "destination": zod.string(),
+  "status": zod.string(),
+  "priority": zod.string(),
+  "cargo": zod.string().nullish(),
+  "weightKg": zod.number().nullish(),
+  "distanceKm": zod.number().nullish(),
+  "scheduledFor": zod.string().nullish(),
+  "deliveredAt": zod.string().nullish(),
+  "createdAt": zod.string(),
+  "unreadMessages": zod.number()
+})
+export const GetDispatchJobsResponse = zod.array(GetDispatchJobsResponseItem)
+
+
+/**
+ * @summary Create a dispatch job
+ */
+
+
+
+
+
+export const CreateDispatchJobBody = zod.object({
+  "reference": zod.string().min(1),
+  "origin": zod.string().min(1),
+  "destination": zod.string().min(1),
+  "driverId": zod.string().optional(),
+  "vehicleId": zod.string().optional(),
+  "priority": zod.enum(['LOW', 'MEDIUM', 'HIGH']).optional(),
+  "cargo": zod.string().optional(),
+  "weightKg": zod.number().optional(),
+  "distanceKm": zod.number().optional(),
+  "scheduledFor": zod.string().optional()
+})
+
+export const CreateDispatchJobResponse = zod.object({
+  "id": zod.string(),
+  "reference": zod.string(),
+  "driverId": zod.string().nullish(),
+  "driverName": zod.string().nullish(),
+  "vehicleId": zod.string().nullish(),
+  "vehicleReg": zod.string().nullish(),
+  "origin": zod.string(),
+  "destination": zod.string(),
+  "status": zod.string(),
+  "priority": zod.string(),
+  "cargo": zod.string().nullish(),
+  "weightKg": zod.number().nullish(),
+  "distanceKm": zod.number().nullish(),
+  "scheduledFor": zod.string().nullish(),
+  "deliveredAt": zod.string().nullish(),
+  "createdAt": zod.string(),
+  "unreadMessages": zod.number()
+})
+
+
+/**
+ * @summary Update a dispatch job (assign, progress status)
+ */
+export const UpdateDispatchJobParams = zod.object({
+  "id": zod.coerce.string()
+})
+
+export const UpdateDispatchJobBody = zod.object({
+  "driverId": zod.string().nullish(),
+  "vehicleId": zod.string().nullish(),
+  "status": zod.enum(['DRAFT', 'ASSIGNED', 'EN_ROUTE', 'DELIVERED', 'CANCELLED']).optional(),
+  "priority": zod.enum(['LOW', 'MEDIUM', 'HIGH']).optional(),
+  "cargo": zod.string().optional(),
+  "weightKg": zod.number().optional(),
+  "distanceKm": zod.number().optional(),
+  "scheduledFor": zod.string().optional()
+})
+
+export const UpdateDispatchJobResponse = zod.object({
+  "id": zod.string(),
+  "reference": zod.string(),
+  "driverId": zod.string().nullish(),
+  "driverName": zod.string().nullish(),
+  "vehicleId": zod.string().nullish(),
+  "vehicleReg": zod.string().nullish(),
+  "origin": zod.string(),
+  "destination": zod.string(),
+  "status": zod.string(),
+  "priority": zod.string(),
+  "cargo": zod.string().nullish(),
+  "weightKg": zod.number().nullish(),
+  "distanceKm": zod.number().nullish(),
+  "scheduledFor": zod.string().nullish(),
+  "deliveredAt": zod.string().nullish(),
+  "createdAt": zod.string(),
+  "unreadMessages": zod.number()
+})
+
+
+/**
+ * @summary List messages for a job
+ */
+export const GetDispatchMessagesParams = zod.object({
+  "id": zod.coerce.string()
+})
+
+export const GetDispatchMessagesResponseItem = zod.object({
+  "id": zod.string(),
+  "direction": zod.string(),
+  "body": zod.string(),
+  "sentAt": zod.string(),
+  "readAt": zod.string().nullish()
+})
+export const GetDispatchMessagesResponse = zod.array(GetDispatchMessagesResponseItem)
+
+
+/**
+ * @summary Send a message to the driver on a job
+ */
+export const SendDispatchMessageParams = zod.object({
+  "id": zod.coerce.string()
+})
+
+
+
+
+export const SendDispatchMessageBody = zod.object({
+  "body": zod.string().min(1)
+})
+
+export const SendDispatchMessageResponse = zod.object({
+  "id": zod.string(),
+  "direction": zod.string(),
+  "body": zod.string(),
+  "sentAt": zod.string(),
+  "readAt": zod.string().nullish()
+})
+
+
+/**
+ * @summary Fleet reporting and analytics
+ */
+export const GetAnalyticsReportResponse = zod.object({
+  "totalDistanceKm": zod.number(),
+  "totalFuelLitres": zod.number(),
+  "avgEfficiencyL100km": zod.number(),
+  "co2Tonnes": zod.number(),
+  "idlePct": zod.number(),
+  "utilizationPct": zod.number(),
+  "series": zod.array(zod.object({
+  "label": zod.string(),
+  "distanceKm": zod.number(),
+  "fuelLitres": zod.number(),
+  "events": zod.number()
+})),
+  "safetyByDriver": zod.array(zod.object({
+  "label": zod.string(),
+  "value": zod.number()
+})),
+  "distanceByVehicle": zod.array(zod.object({
+  "label": zod.string(),
+  "value": zod.number()
+})),
+  "incidentsByType": zod.array(zod.object({
+  "label": zod.string(),
+  "value": zod.number()
+}))
+})
+
+
+/**
+ * @summary Per-driver hours-of-service compliance (ELD)
+ */
+export const GetComplianceHosResponseItem = zod.object({
+  "driverId": zod.string(),
+  "driverName": zod.string(),
+  "status": zod.string(),
+  "hours": zod.object({
+  "status": zod.string(),
+  "continuous": zod.object({
+  "usedMins": zod.number(),
+  "limitMins": zod.number(),
+  "remainingMins": zod.number(),
+  "status": zod.string()
+}),
+  "daily": zod.object({
+  "usedMins": zod.number(),
+  "limitMins": zod.number(),
+  "remainingMins": zod.number(),
+  "status": zod.string()
+}),
+  "weekly": zod.object({
+  "usedMins": zod.number(),
+  "limitMins": zod.number(),
+  "remainingMins": zod.number(),
+  "status": zod.string()
+})
+}),
+  "certifiedDays": zod.number(),
+  "uncertifiedDays": zod.number(),
+  "lastCertifiedOn": zod.string().nullish()
+})
+export const GetComplianceHosResponse = zod.array(GetComplianceHosResponseItem)
+
+
+/**
+ * @summary List customizable alert rules
+ */
+export const GetAlertRulesResponseItem = zod.object({
+  "kind": zod.string(),
+  "enabled": zod.boolean(),
+  "threshold": zod.number().nullish(),
+  "severity": zod.string(),
+  "notifyEmail": zod.boolean(),
+  "notifySms": zod.boolean(),
+  "notifyPush": zod.boolean()
+})
+export const GetAlertRulesResponse = zod.array(GetAlertRulesResponseItem)
+
+
+/**
+ * @summary Update (upsert) one alert rule by kind
+ */
+export const UpdateAlertRuleParams = zod.object({
+  "kind": zod.coerce.string()
+})
+
+export const UpdateAlertRuleBody = zod.object({
+  "enabled": zod.boolean().optional(),
+  "threshold": zod.number().nullish(),
+  "severity": zod.enum(['LOW', 'MEDIUM', 'HIGH']).optional(),
+  "notifyEmail": zod.boolean().optional(),
+  "notifySms": zod.boolean().optional(),
+  "notifyPush": zod.boolean().optional()
+})
+
+export const UpdateAlertRuleResponse = zod.object({
+  "kind": zod.string(),
+  "enabled": zod.boolean(),
+  "threshold": zod.number().nullish(),
+  "severity": zod.string(),
+  "notifyEmail": zod.boolean(),
+  "notifySms": zod.boolean(),
+  "notifyPush": zod.boolean()
+})
+
+
+/**
+ * @summary List API keys
+ */
+export const GetApiKeysResponseItem = zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "prefix": zod.string(),
+  "scopes": zod.array(zod.string()),
+  "lastUsedAt": zod.string().nullish(),
+  "createdAt": zod.string(),
+  "revoked": zod.boolean()
+})
+export const GetApiKeysResponse = zod.array(GetApiKeysResponseItem)
+
+
+/**
+ * @summary Create an API key (plaintext returned once)
+ */
+
+
+
+export const CreateApiKeyBody = zod.object({
+  "name": zod.string().min(1),
+  "scopes": zod.array(zod.string()).optional()
+})
+
+export const CreateApiKeyResponse = zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "prefix": zod.string(),
+  "key": zod.string().describe('The plaintext key, shown only once at creation.'),
+  "scopes": zod.array(zod.string()),
+  "createdAt": zod.string()
+})
+
+
+/**
+ * @summary Revoke an API key
+ */
+export const RevokeApiKeyParams = zod.object({
+  "id": zod.coerce.string()
+})
+
+
+/**
+ * @summary List webhooks
+ */
+export const GetWebhooksResponseItem = zod.object({
+  "id": zod.string(),
+  "url": zod.string(),
+  "events": zod.array(zod.string()),
+  "active": zod.boolean(),
+  "createdAt": zod.string(),
+  "lastDeliveryAt": zod.string().nullish(),
+  "lastStatus": zod.number().nullish()
+})
+export const GetWebhooksResponse = zod.array(GetWebhooksResponseItem)
+
+
+/**
+ * @summary Create a webhook subscription
+ */
+
+
+
+export const CreateWebhookBody = zod.object({
+  "url": zod.string().min(1),
+  "events": zod.array(zod.string())
+})
+
+export const CreateWebhookResponse = zod.object({
+  "id": zod.string(),
+  "url": zod.string(),
+  "events": zod.array(zod.string()),
+  "active": zod.boolean(),
+  "createdAt": zod.string(),
+  "lastDeliveryAt": zod.string().nullish(),
+  "lastStatus": zod.number().nullish()
+})
+
+
+/**
+ * @summary Delete a webhook
+ */
+export const DeleteWebhookParams = zod.object({
+  "id": zod.coerce.string()
+})
+
+
+/**
+ * External device gateways POST batches of telemetry here using an API key in the `x-api-key` header. The org is resolved from the key, not a session.
+
+ * @summary Ingest a device telemetry batch (authenticated by API key)
+ */
+export const IngestTelemetryBody = zod.object({
+  "pings": zod.array(zod.object({
+  "vehicleReg": zod.string(),
+  "lat": zod.number(),
+  "lng": zod.number(),
+  "speedKph": zod.number(),
+  "placeLabel": zod.string().optional(),
+  "recordedAt": zod.string()
+}))
+})
+
+export const IngestTelemetryResponse = zod.object({
+  "accepted": zod.number(),
+  "rejected": zod.number()
+})
+
+

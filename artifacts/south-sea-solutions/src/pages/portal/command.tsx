@@ -5,6 +5,16 @@ import { PortalLayout } from "@/portal/PortalLayout";
 import { Metric, StatusPill, FuelBar, statusTone } from "@/portal/ui";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { AlertsTab, SetupTab } from "./shared-tabs";
+import { OverviewTab } from "./telematics/overview";
+import { HealthTab } from "./telematics/health";
+import { BehaviorTab } from "./telematics/behavior";
+import { GeofencesTab } from "./telematics/geofences";
+import { MaintenanceTab } from "./telematics/maintenance";
+import { DispatchTab } from "./telematics/dispatch";
+import { ComplianceTab } from "./telematics/compliance";
+import { AnalyticsTab } from "./telematics/analytics";
+import { IntegrationsTab } from "./telematics/integrations";
+import { AlertRulesTab } from "./telematics/alert-rules";
 
 function lastSeen(iso: string | null | undefined): string {
   if (!iso) return "No signal";
@@ -158,21 +168,63 @@ export default function CommandPage() {
       <div className="mb-6">
         <h1 className="font-display text-2xl font-bold tracking-tight">Command center</h1>
         <p className="text-sm text-muted-foreground">
-          Full fleet telemetry, certification and compliance. Owner workspace.
+          Fleet intelligence, live telemetry, diagnostics, behaviour, dispatch and compliance. Owner workspace.
         </p>
       </div>
 
-      <Tabs defaultValue="telemetry">
-        <TabsList>
-          <TabsTrigger value="telemetry">Telemetry</TabsTrigger>
-          <TabsTrigger value="alerts">Alerts</TabsTrigger>
-          <TabsTrigger value="setup">Setup</TabsTrigger>
-        </TabsList>
+      <Tabs defaultValue="overview">
+        <div className="overflow-x-auto pb-1">
+          <TabsList className="h-auto flex-wrap justify-start">
+            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="telemetry">Telemetry</TabsTrigger>
+            <TabsTrigger value="health">Health</TabsTrigger>
+            <TabsTrigger value="behavior">Behaviour</TabsTrigger>
+            <TabsTrigger value="geofences">Geofences</TabsTrigger>
+            <TabsTrigger value="maintenance">Maintenance</TabsTrigger>
+            <TabsTrigger value="dispatch">Dispatch</TabsTrigger>
+            <TabsTrigger value="compliance">Compliance</TabsTrigger>
+            <TabsTrigger value="analytics">Analytics</TabsTrigger>
+            <TabsTrigger value="alerts">Alerts</TabsTrigger>
+            <TabsTrigger value="rules">Alert rules</TabsTrigger>
+            <TabsTrigger value="integrations">Integrations</TabsTrigger>
+            <TabsTrigger value="setup">Setup</TabsTrigger>
+          </TabsList>
+        </div>
+        <TabsContent value="overview" className="mt-6">
+          <OverviewTab />
+        </TabsContent>
         <TabsContent value="telemetry" className="mt-6">
           <TelemetryTab />
         </TabsContent>
+        <TabsContent value="health" className="mt-6">
+          <HealthTab />
+        </TabsContent>
+        <TabsContent value="behavior" className="mt-6">
+          <BehaviorTab />
+        </TabsContent>
+        <TabsContent value="geofences" className="mt-6">
+          <GeofencesTab />
+        </TabsContent>
+        <TabsContent value="maintenance" className="mt-6">
+          <MaintenanceTab />
+        </TabsContent>
+        <TabsContent value="dispatch" className="mt-6">
+          <DispatchTab />
+        </TabsContent>
+        <TabsContent value="compliance" className="mt-6">
+          <ComplianceTab />
+        </TabsContent>
+        <TabsContent value="analytics" className="mt-6">
+          <AnalyticsTab />
+        </TabsContent>
         <TabsContent value="alerts" className="mt-6">
           <AlertsTab />
+        </TabsContent>
+        <TabsContent value="rules" className="mt-6">
+          <AlertRulesTab />
+        </TabsContent>
+        <TabsContent value="integrations" className="mt-6">
+          <IntegrationsTab />
         </TabsContent>
         <TabsContent value="setup" className="mt-6">
           <SetupTab />

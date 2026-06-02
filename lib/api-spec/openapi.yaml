@@ -24,6 +24,22 @@ tags:
     description: Interactive training for all users
   - name: platform
     description: Superadmin platform console
+  - name: telematics
+    description: Fleet intelligence, vehicle health and engine diagnostics
+  - name: geofences
+    description: Geofence definitions and breach events
+  - name: behavior
+    description: Driver behaviour monitoring and scoring
+  - name: maintenance
+    description: Maintenance scheduling and work orders
+  - name: dispatch
+    description: Dispatch board and driver messaging
+  - name: analytics
+    description: Reporting and analytics
+  - name: compliance
+    description: ELD hours-of-service compliance
+  - name: integrations
+    description: API keys, webhooks and device ingest
 paths:
   /healthz:
     get:
@@ -651,6 +667,501 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/AuditLogEntry"
+  /telematics/overview:
+    get:
+      operationId: getTelematicsOverview
+      tags: [telematics]
+      summary: Unified fleet intelligence overview
+      responses:
+        "200":
+          description: Fleet intelligence
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FleetIntelligence"
+  /telematics/health:
+    get:
+      operationId: getVehicleHealthRows
+      tags: [telematics]
+      summary: Engine health and diagnostics for every active vehicle
+      responses:
+        "200":
+          description: Vehicle health rows
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/VehicleHealthRow"
+  /telematics/health/{vehicleId}:
+    get:
+      operationId: getVehicleHealthDetail
+      tags: [telematics]
+      summary: Full engine diagnostics for one vehicle
+      parameters:
+        - name: vehicleId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Vehicle health detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VehicleHealthDetail"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorMessage"
+  /geofences:
+    get:
+      operationId: getGeofences
+      tags: [geofences]
+      summary: List geofences
+      responses:
+        "200":
+          description: Geofences
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Geofence"
+    post:
+      operationId: createGeofence
+      tags: [geofences]
+      summary: Create a geofence
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GeofenceInput"
+      responses:
+        "200":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Geofence"
+  /geofences/{id}:
+    patch:
+      operationId: updateGeofence
+      tags: [geofences]
+      summary: Update a geofence
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GeofenceUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Geofence"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorMessage"
+    delete:
+      operationId: deleteGeofence
+      tags: [geofences]
+      summary: Delete a geofence
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Deleted
+  /geofences/events:
+    get:
+      operationId: getGeofenceEvents
+      tags: [geofences]
+      summary: Recent geofence crossings
+      responses:
+        "200":
+          description: Events
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/GeofenceEventItem"
+  /behavior:
+    get:
+      operationId: getBehaviorOverview
+      tags: [behavior]
+      summary: Driver behaviour leaderboard and recent events
+      responses:
+        "200":
+          description: Behaviour overview
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BehaviorOverview"
+  /maintenance:
+    get:
+      operationId: getMaintenanceBoard
+      tags: [maintenance]
+      summary: Maintenance due list and work orders
+      responses:
+        "200":
+          description: Maintenance board
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MaintenanceBoard"
+  /maintenance/work-orders:
+    post:
+      operationId: createWorkOrder
+      tags: [maintenance]
+      summary: Create a work order
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WorkOrderInput"
+      responses:
+        "200":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkOrderItem"
+  /maintenance/work-orders/{id}:
+    patch:
+      operationId: updateWorkOrder
+      tags: [maintenance]
+      summary: Update a work order
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WorkOrderUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkOrderItem"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorMessage"
+  /dispatch/jobs:
+    get:
+      operationId: getDispatchJobs
+      tags: [dispatch]
+      summary: List dispatch jobs
+      responses:
+        "200":
+          description: Jobs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/DispatchJobItem"
+    post:
+      operationId: createDispatchJob
+      tags: [dispatch]
+      summary: Create a dispatch job
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DispatchJobInput"
+      responses:
+        "200":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DispatchJobItem"
+  /dispatch/jobs/{id}:
+    patch:
+      operationId: updateDispatchJob
+      tags: [dispatch]
+      summary: Update a dispatch job (assign, progress status)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DispatchJobUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DispatchJobItem"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorMessage"
+  /dispatch/jobs/{id}/messages:
+    get:
+      operationId: getDispatchMessages
+      tags: [dispatch]
+      summary: List messages for a job
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Messages
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/DispatchMessageItem"
+    post:
+      operationId: sendDispatchMessage
+      tags: [dispatch]
+      summary: Send a message to the driver on a job
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DispatchMessageInput"
+      responses:
+        "200":
+          description: Sent
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DispatchMessageItem"
+  /analytics/report:
+    get:
+      operationId: getAnalyticsReport
+      tags: [analytics]
+      summary: Fleet reporting and analytics
+      responses:
+        "200":
+          description: Analytics report
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AnalyticsReport"
+  /compliance/hos:
+    get:
+      operationId: getComplianceHos
+      tags: [compliance]
+      summary: Per-driver hours-of-service compliance (ELD)
+      responses:
+        "200":
+          description: HOS rows
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/DriverHosRow"
+  /setup/alert-rules:
+    get:
+      operationId: getAlertRules
+      tags: [setup]
+      summary: List customizable alert rules
+      responses:
+        "200":
+          description: Alert rules
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AlertRule"
+  /setup/alert-rules/{kind}:
+    patch:
+      operationId: updateAlertRule
+      tags: [setup]
+      summary: Update (upsert) one alert rule by kind
+      parameters:
+        - name: kind
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AlertRuleUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AlertRule"
+  /integrations/api-keys:
+    get:
+      operationId: getApiKeys
+      tags: [integrations]
+      summary: List API keys
+      responses:
+        "200":
+          description: API keys
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ApiKeyItem"
+    post:
+      operationId: createApiKey
+      tags: [integrations]
+      summary: Create an API key (plaintext returned once)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiKeyInput"
+      responses:
+        "200":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiKeyCreated"
+  /integrations/api-keys/{id}:
+    delete:
+      operationId: revokeApiKey
+      tags: [integrations]
+      summary: Revoke an API key
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Revoked
+  /integrations/webhooks:
+    get:
+      operationId: getWebhooks
+      tags: [integrations]
+      summary: List webhooks
+      responses:
+        "200":
+          description: Webhooks
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/WebhookItem"
+    post:
+      operationId: createWebhook
+      tags: [integrations]
+      summary: Create a webhook subscription
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WebhookInput"
+      responses:
+        "200":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WebhookItem"
+  /integrations/webhooks/{id}:
+    delete:
+      operationId: deleteWebhook
+      tags: [integrations]
+      summary: Delete a webhook
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Deleted
+  /ingest/telemetry:
+    post:
+      operationId: ingestTelemetry
+      tags: [integrations]
+      summary: Ingest a device telemetry batch (authenticated by API key)
+      description: >
+        External device gateways POST batches of telemetry here using an API key
+        in the `x-api-key` header. The org is resolved from the key, not a session.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TelemetryIngest"
+      responses:
+        "200":
+          description: Accepted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IngestReceipt"
+        "401":
+          description: Invalid or missing API key
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorMessage"
 components:
   schemas:
     HealthStatus:
@@ -1370,3 +1881,760 @@ components:
         orgId:
           type: string
           minLength: 1
+    ScoreCard:
+      type: object
+      required: [label, score, delta, unit]
+      properties:
+        label:
+          type: string
+        score:
+          type: integer
+        delta:
+          type: integer
+          description: Change versus the prior period (positive is better).
+        unit:
+          type: string
+    IntelligenceInsight:
+      type: object
+      required: [id, severity, title, detail, area]
+      properties:
+        id:
+          type: string
+        severity:
+          type: string
+        title:
+          type: string
+        detail:
+          type: string
+        area:
+          type: string
+        driverId:
+          type: ["string", "null"]
+        vehicleId:
+          type: ["string", "null"]
+    FleetIntelligence:
+      type: object
+      required:
+        - healthScore
+        - safetyScore
+        - efficiencyScore
+        - complianceScore
+        - utilizationPct
+        - openAlerts
+        - activeFaults
+        - dueServices
+        - geofenceBreaches
+        - openJobs
+        - scorecards
+        - insights
+      properties:
+        healthScore:
+          type: integer
+        safetyScore:
+          type: integer
+        efficiencyScore:
+          type: integer
+        complianceScore:
+          type: integer
+        utilizationPct:
+          type: integer
+        openAlerts:
+          type: integer
+        activeFaults:
+          type: integer
+        dueServices:
+          type: integer
+        geofenceBreaches:
+          type: integer
+        openJobs:
+          type: integer
+        scorecards:
+          type: array
+          items:
+            $ref: "#/components/schemas/ScoreCard"
+        insights:
+          type: array
+          items:
+            $ref: "#/components/schemas/IntelligenceInsight"
+    FaultCodeItem:
+      type: object
+      required: [id, code, description, system, severity, active, occurredAt]
+      properties:
+        id:
+          type: string
+        code:
+          type: string
+        description:
+          type: string
+        system:
+          type: string
+        severity:
+          type: string
+        active:
+          type: boolean
+        occurredAt:
+          type: string
+    VehicleHealthRow:
+      type: object
+      required: [vehicleId, reg, driverName, healthScore, milOn, activeFaults]
+      properties:
+        vehicleId:
+          type: string
+        reg:
+          type: string
+        driverName:
+          type: string
+        healthScore:
+          type: integer
+        milOn:
+          type: boolean
+        engineTempC:
+          type: ["integer", "null"]
+        batteryV:
+          type: ["number", "null"]
+        oilLifePct:
+          type: ["integer", "null"]
+        defLevelPct:
+          type: ["integer", "null"]
+        tirePressureKpa:
+          type: ["integer", "null"]
+        engineHours:
+          type: ["integer", "null"]
+        activeFaults:
+          type: integer
+        nextServiceInKm:
+          type: ["integer", "null"]
+        nextServiceInDays:
+          type: ["integer", "null"]
+        recordedAt:
+          type: ["string", "null"]
+    VehicleHealthDetail:
+      type: object
+      required: [vehicleId, reg, driverName, healthScore, milOn, faults, plans]
+      properties:
+        vehicleId:
+          type: string
+        reg:
+          type: string
+        driverName:
+          type: string
+        healthScore:
+          type: integer
+        milOn:
+          type: boolean
+        engineTempC:
+          type: ["integer", "null"]
+        coolantTempC:
+          type: ["integer", "null"]
+        oilPressureKpa:
+          type: ["integer", "null"]
+        oilLifePct:
+          type: ["integer", "null"]
+        batteryV:
+          type: ["number", "null"]
+        tirePressureKpa:
+          type: ["integer", "null"]
+        engineHours:
+          type: ["integer", "null"]
+        defLevelPct:
+          type: ["integer", "null"]
+        odometerKm:
+          type: ["integer", "null"]
+        recordedAt:
+          type: ["string", "null"]
+        faults:
+          type: array
+          items:
+            $ref: "#/components/schemas/FaultCodeItem"
+        plans:
+          type: array
+          items:
+            $ref: "#/components/schemas/MaintenanceDueItem"
+    Geofence:
+      type: object
+      required: [id, name, kind, centerLat, centerLng, radiusM, active]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        kind:
+          type: string
+        centerLat:
+          type: number
+        centerLng:
+          type: number
+        radiusM:
+          type: integer
+        active:
+          type: boolean
+    GeofenceInput:
+      type: object
+      required: [name, kind, centerLat, centerLng, radiusM]
+      properties:
+        name:
+          type: string
+          minLength: 1
+        kind:
+          type: string
+          enum: [DEPOT, CORRIDOR, BORDER, CUSTOMER, NOGO]
+        centerLat:
+          type: number
+        centerLng:
+          type: number
+        radiusM:
+          type: integer
+          minimum: 50
+        active:
+          type: boolean
+    GeofenceUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+        kind:
+          type: string
+          enum: [DEPOT, CORRIDOR, BORDER, CUSTOMER, NOGO]
+        centerLat:
+          type: number
+        centerLng:
+          type: number
+        radiusM:
+          type: integer
+          minimum: 50
+        active:
+          type: boolean
+    GeofenceEventItem:
+      type: object
+      required: [id, geofenceName, geofenceKind, driverId, driverName, vehicleReg, type, recordedAt]
+      properties:
+        id:
+          type: string
+        geofenceName:
+          type: string
+        geofenceKind:
+          type: string
+        driverId:
+          type: string
+        driverName:
+          type: string
+        vehicleReg:
+          type: string
+        type:
+          type: string
+        recordedAt:
+          type: string
+    BehaviorDriverRow:
+      type: object
+      required: [driverId, driverName, behaviorScore, eventCount, harshEvents, speedingEvents, idleEvents, distractionEvents]
+      properties:
+        driverId:
+          type: string
+        driverName:
+          type: string
+        behaviorScore:
+          type: integer
+        eventCount:
+          type: integer
+        harshEvents:
+          type: integer
+        speedingEvents:
+          type: integer
+        idleEvents:
+          type: integer
+        distractionEvents:
+          type: integer
+    BehaviorEventItem:
+      type: object
+      required: [id, driverId, driverName, vehicleReg, type, severity, recordedAt]
+      properties:
+        id:
+          type: string
+        driverId:
+          type: string
+        driverName:
+          type: string
+        vehicleReg:
+          type: string
+        type:
+          type: string
+        severity:
+          type: string
+        value:
+          type: ["number", "null"]
+        placeLabel:
+          type: ["string", "null"]
+        recordedAt:
+          type: string
+    BehaviorTypeCount:
+      type: object
+      required: [type, count]
+      properties:
+        type:
+          type: string
+        count:
+          type: integer
+    BehaviorOverview:
+      type: object
+      required: [fleetScore, totalEvents, drivers, recent, byType]
+      properties:
+        fleetScore:
+          type: integer
+        totalEvents:
+          type: integer
+        drivers:
+          type: array
+          items:
+            $ref: "#/components/schemas/BehaviorDriverRow"
+        recent:
+          type: array
+          items:
+            $ref: "#/components/schemas/BehaviorEventItem"
+        byType:
+          type: array
+          items:
+            $ref: "#/components/schemas/BehaviorTypeCount"
+    MaintenanceDueItem:
+      type: object
+      required: [planId, name, vehicleId, vehicleReg, state]
+      properties:
+        planId:
+          type: string
+        name:
+          type: string
+        vehicleId:
+          type: string
+        vehicleReg:
+          type: string
+        state:
+          type: string
+          description: VALID, DUE_SOON or OVERDUE.
+        dueInKm:
+          type: ["integer", "null"]
+        dueInDays:
+          type: ["integer", "null"]
+        lastServiceOn:
+          type: ["string", "null"]
+    WorkOrderItem:
+      type: object
+      required: [id, vehicleId, vehicleReg, title, status, priority, createdAt]
+      properties:
+        id:
+          type: string
+        vehicleId:
+          type: string
+        vehicleReg:
+          type: string
+        title:
+          type: string
+        detail:
+          type: ["string", "null"]
+        status:
+          type: string
+        priority:
+          type: string
+        dueOn:
+          type: ["string", "null"]
+        dueKm:
+          type: ["integer", "null"]
+        costEstimate:
+          type: ["integer", "null"]
+        createdAt:
+          type: string
+        completedOn:
+          type: ["string", "null"]
+    WorkOrderInput:
+      type: object
+      required: [vehicleId, title]
+      properties:
+        vehicleId:
+          type: string
+          minLength: 1
+        title:
+          type: string
+          minLength: 1
+        detail:
+          type: string
+        priority:
+          type: string
+          enum: [LOW, MEDIUM, HIGH]
+        dueOn:
+          type: string
+        dueKm:
+          type: integer
+        costEstimate:
+          type: integer
+    WorkOrderUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+        detail:
+          type: string
+        status:
+          type: string
+          enum: [OPEN, IN_PROGRESS, DONE, CANCELLED]
+        priority:
+          type: string
+          enum: [LOW, MEDIUM, HIGH]
+        dueOn:
+          type: string
+        dueKm:
+          type: integer
+        costEstimate:
+          type: integer
+    MaintenanceBoard:
+      type: object
+      required: [overdue, dueSoon, openWorkOrders, due, workOrders]
+      properties:
+        overdue:
+          type: integer
+        dueSoon:
+          type: integer
+        openWorkOrders:
+          type: integer
+        due:
+          type: array
+          items:
+            $ref: "#/components/schemas/MaintenanceDueItem"
+        workOrders:
+          type: array
+          items:
+            $ref: "#/components/schemas/WorkOrderItem"
+    DispatchJobItem:
+      type: object
+      required: [id, reference, origin, destination, status, priority, createdAt, unreadMessages]
+      properties:
+        id:
+          type: string
+        reference:
+          type: string
+        driverId:
+          type: ["string", "null"]
+        driverName:
+          type: ["string", "null"]
+        vehicleId:
+          type: ["string", "null"]
+        vehicleReg:
+          type: ["string", "null"]
+        origin:
+          type: string
+        destination:
+          type: string
+        status:
+          type: string
+        priority:
+          type: string
+        cargo:
+          type: ["string", "null"]
+        weightKg:
+          type: ["integer", "null"]
+        distanceKm:
+          type: ["integer", "null"]
+        scheduledFor:
+          type: ["string", "null"]
+        deliveredAt:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+        unreadMessages:
+          type: integer
+    DispatchJobInput:
+      type: object
+      required: [reference, origin, destination]
+      properties:
+        reference:
+          type: string
+          minLength: 1
+        origin:
+          type: string
+          minLength: 1
+        destination:
+          type: string
+          minLength: 1
+        driverId:
+          type: string
+        vehicleId:
+          type: string
+        priority:
+          type: string
+          enum: [LOW, MEDIUM, HIGH]
+        cargo:
+          type: string
+        weightKg:
+          type: integer
+        distanceKm:
+          type: integer
+        scheduledFor:
+          type: string
+    DispatchJobUpdate:
+      type: object
+      properties:
+        driverId:
+          type: ["string", "null"]
+        vehicleId:
+          type: ["string", "null"]
+        status:
+          type: string
+          enum: [DRAFT, ASSIGNED, EN_ROUTE, DELIVERED, CANCELLED]
+        priority:
+          type: string
+          enum: [LOW, MEDIUM, HIGH]
+        cargo:
+          type: string
+        weightKg:
+          type: integer
+        distanceKm:
+          type: integer
+        scheduledFor:
+          type: string
+    DispatchMessageItem:
+      type: object
+      required: [id, direction, body, sentAt]
+      properties:
+        id:
+          type: string
+        direction:
+          type: string
+        body:
+          type: string
+        sentAt:
+          type: string
+        readAt:
+          type: ["string", "null"]
+    DispatchMessageInput:
+      type: object
+      required: [body]
+      properties:
+        body:
+          type: string
+          minLength: 1
+    AnalyticsSeriesPoint:
+      type: object
+      required: [label, distanceKm, fuelLitres, events]
+      properties:
+        label:
+          type: string
+        distanceKm:
+          type: integer
+        fuelLitres:
+          type: integer
+        events:
+          type: integer
+    AnalyticsBreakdownItem:
+      type: object
+      required: [label, value]
+      properties:
+        label:
+          type: string
+        value:
+          type: integer
+    AnalyticsReport:
+      type: object
+      required:
+        - totalDistanceKm
+        - totalFuelLitres
+        - avgEfficiencyL100km
+        - co2Tonnes
+        - idlePct
+        - utilizationPct
+        - series
+        - safetyByDriver
+        - distanceByVehicle
+        - incidentsByType
+      properties:
+        totalDistanceKm:
+          type: integer
+        totalFuelLitres:
+          type: integer
+        avgEfficiencyL100km:
+          type: number
+        co2Tonnes:
+          type: number
+        idlePct:
+          type: integer
+        utilizationPct:
+          type: integer
+        series:
+          type: array
+          items:
+            $ref: "#/components/schemas/AnalyticsSeriesPoint"
+        safetyByDriver:
+          type: array
+          items:
+            $ref: "#/components/schemas/AnalyticsBreakdownItem"
+        distanceByVehicle:
+          type: array
+          items:
+            $ref: "#/components/schemas/AnalyticsBreakdownItem"
+        incidentsByType:
+          type: array
+          items:
+            $ref: "#/components/schemas/AnalyticsBreakdownItem"
+    DriverHosRow:
+      type: object
+      required: [driverId, driverName, status, hours, certifiedDays, uncertifiedDays]
+      properties:
+        driverId:
+          type: string
+        driverName:
+          type: string
+        status:
+          type: string
+        hours:
+          $ref: "#/components/schemas/HosClocks"
+        certifiedDays:
+          type: integer
+        uncertifiedDays:
+          type: integer
+        lastCertifiedOn:
+          type: ["string", "null"]
+    AlertRule:
+      type: object
+      required: [kind, enabled, severity, notifyEmail, notifySms, notifyPush]
+      properties:
+        kind:
+          type: string
+        enabled:
+          type: boolean
+        threshold:
+          type: ["integer", "null"]
+        severity:
+          type: string
+        notifyEmail:
+          type: boolean
+        notifySms:
+          type: boolean
+        notifyPush:
+          type: boolean
+    AlertRuleUpdate:
+      type: object
+      properties:
+        enabled:
+          type: boolean
+        threshold:
+          type: ["integer", "null"]
+        severity:
+          type: string
+          enum: [LOW, MEDIUM, HIGH]
+        notifyEmail:
+          type: boolean
+        notifySms:
+          type: boolean
+        notifyPush:
+          type: boolean
+    ApiKeyItem:
+      type: object
+      required: [id, name, prefix, scopes, createdAt, revoked]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        prefix:
+          type: string
+        scopes:
+          type: array
+          items:
+            type: string
+        lastUsedAt:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+        revoked:
+          type: boolean
+    ApiKeyInput:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+          minLength: 1
+        scopes:
+          type: array
+          items:
+            type: string
+    ApiKeyCreated:
+      type: object
+      required: [id, name, prefix, key, scopes, createdAt]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        prefix:
+          type: string
+        key:
+          type: string
+          description: The plaintext key, shown only once at creation.
+        scopes:
+          type: array
+          items:
+            type: string
+        createdAt:
+          type: string
+    WebhookItem:
+      type: object
+      required: [id, url, events, active, createdAt]
+      properties:
+        id:
+          type: string
+        url:
+          type: string
+        events:
+          type: array
+          items:
+            type: string
+        active:
+          type: boolean
+        createdAt:
+          type: string
+        lastDeliveryAt:
+          type: ["string", "null"]
+        lastStatus:
+          type: ["integer", "null"]
+    WebhookInput:
+      type: object
+      required: [url, events]
+      properties:
+        url:
+          type: string
+          minLength: 1
+        events:
+          type: array
+          items:
+            type: string
+    TelemetryPingInput:
+      type: object
+      required: [vehicleReg, lat, lng, speedKph, recordedAt]
+      properties:
+        vehicleReg:
+          type: string
+        lat:
+          type: number
+        lng:
+          type: number
+        speedKph:
+          type: integer
+        placeLabel:
+          type: string
+        recordedAt:
+          type: string
+    TelemetryIngest:
+      type: object
+      required: [pings]
+      properties:
+        pings:
+          type: array
+          items:
+            $ref: "#/components/schemas/TelemetryPingInput"
+    IngestReceipt:
+      type: object
+      required: [accepted, rejected]
+      properties:
+        accepted:
+          type: integer
+        rejected:
+          type: integer

@@ -24,6 +24,18 @@ import {
   trainingModulesTable,
   trainingCompletionsTable,
   trainingSeedModules,
+  vehicleHealthTable,
+  faultCodesTable,
+  behaviorEventsTable,
+  maintenancePlansTable,
+  workOrdersTable,
+  geofencesTable,
+  geofenceEventsTable,
+  dispatchJobsTable,
+  dispatchMessagesTable,
+  alertRulesTable,
+  apiKeysTable,
+  webhooksTable,
 } from "@workspace/db";
 
 const scrypt = promisify(scryptCb);
@@ -46,6 +58,18 @@ function minsAgo(mins: number): Date {
 
 async function clearAll(): Promise<void> {
   // Delete in dependency order (children first).
+  await db.delete(dispatchMessagesTable);
+  await db.delete(dispatchJobsTable);
+  await db.delete(geofenceEventsTable);
+  await db.delete(geofencesTable);
+  await db.delete(behaviorEventsTable);
+  await db.delete(faultCodesTable);
+  await db.delete(vehicleHealthTable);
+  await db.delete(workOrdersTable);
+  await db.delete(maintenancePlansTable);
+  await db.delete(alertRulesTable);
+  await db.delete(apiKeysTable);
+  await db.delete(webhooksTable);
   await db.delete(trainingCompletionsTable);
   await db.delete(alertAcksTable);
   await db.delete(auditLogsTable);
@@ -134,6 +158,7 @@ async function seedOrg(spec: OrgSpec): Promise<string | null> {
     .returning();
 
   let driverUserId: string | null = null;
+  const created: { driver: typeof driversTable.$inferSelect; vehicle: typeof vehiclesTable.$inferSelect }[] = [];
 
   for (let i = 0; i < spec.drivers.length; i++) {
     const ds = spec.drivers[i];
@@ -174,10 +199,22 @@ async function seedOrg(spec: OrgSpec): Promise<string | null> {
       ]);
     }
 
-    await db.insert(dailyLogsTable).values([
-      { driverId: driver.id, date: daysFromNow(-1), driveMins: 480, dutyMins: 540, restMins: 660, certified: true, certifiedAt: minsAgo(1500) },
-      { driverId: driver.id, date: daysFromNow(-2), driveMins: 510, dutyMins: 560, restMins: 640, certified: true, certifiedAt: minsAgo(2940) },
-    ]);
+    // Seven days of certified daily logs so the analytics view has a real trend.
+    await db.insert(dailyLogsTable).values(
+      Array.from({ length: 7 }, (_, d) => {
+        const day = d + 1;
+        const driveMins = ds.driveMins > 0 ? 360 + ((i + day) % 5) * 45 : 0;
+        return {
+          driverId: driver.id,
+          date: daysFromNow(-day),
+          driveMins,
+          dutyMins: driveMins + 60,
+          restMins: 660,
+          certified: day > 1,
+          certifiedAt: day > 1 ? minsAgo(day * 1440) : null,
+        };
+      }),
+    );
 
     await db.insert(tripPingsTable).values({
       driverId: driver.id,
@@ -233,6 +270,108 @@ async function seedOrg(spec: OrgSpec): Promise<string | null> {
       expiresOn: ds.certDays != null ? daysFromNow(ds.certDays) : null,
     });
 
+    // --- Telematics: engine health, diagnostics, behaviour, maintenance ---
+    const odo = 184000 + i * 1200;
+    const unhealthy = ds.cert === "LAPSED" || ds.safety < 75;
+
+    await db.insert(vehicleHealthTable).values({
+      vehicleId: vehicle.id,
+      engineTempC: unhealthy ? 108 : 84 + (i % 8),
+      coolantTempC: unhealthy ? 101 : 80 + (i % 6),
+      oilPressureKpa: 360 + (i % 5) * 12,
+      oilLifePct: unhealthy ? 12 : 45 + (i % 5) * 9,
+      batteryV: unhealthy ? 12.0 : 12.6 + (i % 4) * 0.3,
+      tirePressureKpa: 720 + (i % 5) * 8,
+      engineHours: 3200 + i * 540,
+      defLevelPct: unhealthy ? 8 : 35 + (i % 6) * 9,
+      milOn: unhealthy,
+      recordedAt: minsAgo(6),
+    });
+
+    if (unhealthy) {
+      await db.insert(faultCodesTable).values({
+        vehicleId: vehicle.id,
+        code: "P0420",
+        description: "Catalyst system efficiency below threshold",
+        system: "EMISSIONS",
+        severity: "MEDIUM",
+        active: true,
+        occurredAt: minsAgo(120),
+      });
+    }
+    if (ds.cert === "LAPSED") {
+      await db.insert(faultCodesTable).values({
+        vehicleId: vehicle.id,
+        code: "P0301",
+        description: "Cylinder 1 misfire detected",
+        system: "ENGINE",
+        severity: "HIGH",
+        active: true,
+        occurredAt: minsAgo(200),
+      });
+    }
+
+    const evCount = Math.max(0, Math.round((100 - ds.safety) / 9));
+    const evTypes = [
+      "HARSH_BRAKE",
+      "SPEEDING",
+      "HARSH_ACCEL",
+      "EXCESS_IDLE",
+      "HARSH_CORNER",
+      "PHONE_USE",
+      "OVER_REV",
+      "NO_SEATBELT",
+    ] as const;
+    for (let e = 0; e < evCount; e++) {
+      const t = evTypes[(i + e) % evTypes.length];
+      await db.insert(behaviorEventsTable).values({
+        driverId: driver.id,
+        vehicleId: vehicle.id,
+        type: t,
+        severity: e % 3 === 0 ? "HIGH" : e % 3 === 1 ? "MEDIUM" : "LOW",
+        value: t === "SPEEDING" ? 12 + e : t === "EXCESS_IDLE" ? 35 + e : Math.round((0.4 + e * 0.05) * 100) / 100,
+        lat: -24.6 - i * 0.1,
+        lng: 25.9 + i * 0.1,
+        placeLabel: ds.place,
+        recordedAt: minsAgo((e + 1) * 600 + i * 30),
+      });
+    }
+
+    await db.insert(maintenancePlansTable).values([
+      {
+        vehicleId: vehicle.id,
+        name: "Engine service (15,000 km)",
+        intervalKm: 15000,
+        intervalDays: null,
+        lastServiceKm: i % 3 === 0 ? odo - 15500 : odo - 13800,
+        lastServiceOn: null,
+      },
+      {
+        vehicleId: vehicle.id,
+        name: "Safety inspection (90 days)",
+        intervalKm: null,
+        intervalDays: 90,
+        lastServiceKm: null,
+        lastServiceOn: daysFromNow(i % 4 === 0 ? -95 : -80),
+      },
+    ]);
+
+    if (unhealthy) {
+      await db.insert(workOrdersTable).values({
+        vehicleId: vehicle.id,
+        title: ds.cert === "LAPSED" ? "Investigate cylinder misfire" : "Emissions diagnostics",
+        detail: "Raised automatically from an active diagnostic trouble code.",
+        status: "OPEN",
+        priority: "HIGH",
+        dueOn: daysFromNow(3),
+        dueKm: null,
+        costEstimate: 4500 + i * 200,
+        completedOn: null,
+      });
+    }
+
+    created.push({ driver, vehicle });
+
     if (i === 0) {
       const [du] = await db
         .insert(usersTable)
@@ -249,6 +388,96 @@ async function seedOrg(spec: OrgSpec): Promise<string | null> {
       driverUserId = du.id;
     }
   }
+
+  // --- Org-level telematics: geofences, dispatch, alert rules, integrations ---
+  const fences = await db
+    .insert(geofencesTable)
+    .values([
+      { orgId: org.id, name: spec.depot, kind: "DEPOT", centerLat: -24.65, centerLng: 25.91, radiusM: 1500 },
+      { orgId: org.id, name: "A1 corridor", kind: "CORRIDOR", centerLat: -23.2, centerLng: 26.7, radiusM: 8000 },
+      { orgId: org.id, name: "Border post", kind: "BORDER", centerLat: -22.0, centerLng: 27.9, radiusM: 1200 },
+      { orgId: org.id, name: "Restricted reserve", kind: "NOGO", centerLat: -20.5, centerLng: 24.4, radiusM: 5000 },
+    ])
+    .returning();
+
+  if (created.length) {
+    await db.insert(geofenceEventsTable).values([
+      { geofenceId: fences[0].id, driverId: created[0].driver.id, vehicleId: created[0].vehicle.id, type: "EXIT", recordedAt: minsAgo(220) },
+      { geofenceId: fences[1].id, driverId: created[0].driver.id, vehicleId: created[0].vehicle.id, type: "ENTER", recordedAt: minsAgo(210) },
+    ]);
+
+    const [job1] = await db
+      .insert(dispatchJobsTable)
+      .values({
+        orgId: org.id,
+        reference: "LOAD-1001",
+        origin: spec.depot,
+        destination: "Francistown",
+        driverId: created[0].driver.id,
+        vehicleId: created[0].vehicle.id,
+        status: "EN_ROUTE",
+        priority: "HIGH",
+        cargo: "Mining consumables",
+        weightKg: 28000,
+        distanceKm: 433,
+        scheduledFor: minsAgo(-120),
+      })
+      .returning();
+    await db.insert(dispatchMessagesTable).values([
+      { orgId: org.id, jobId: job1.id, driverId: created[0].driver.id, fromUserId: null, direction: "TO_DRIVER", body: "Confirm ETA at the depot gate.", sentAt: minsAgo(120), readAt: minsAgo(110) },
+      { orgId: org.id, jobId: job1.id, driverId: created[0].driver.id, fromUserId: null, direction: "FROM_DRIVER", body: "On the A1, ETA roughly 2 hours.", sentAt: minsAgo(60), readAt: null },
+    ]);
+
+    if (created.length > 1) {
+      await db.insert(geofenceEventsTable).values({ geofenceId: fences[2].id, driverId: created[1].driver.id, vehicleId: created[1].vehicle.id, type: "ENTER", recordedAt: minsAgo(90) });
+      await db.insert(dispatchJobsTable).values({
+        orgId: org.id,
+        reference: "LOAD-1002",
+        origin: "Gaborone",
+        destination: "Maun",
+        driverId: created[1].driver.id,
+        vehicleId: created[1].vehicle.id,
+        status: "ASSIGNED",
+        priority: "MEDIUM",
+        cargo: "Retail distribution",
+        weightKg: 18000,
+        distanceKm: 930,
+        scheduledFor: minsAgo(-600),
+      });
+    }
+
+    await db.insert(dispatchJobsTable).values({
+      orgId: org.id,
+      reference: "LOAD-1003",
+      origin: spec.depot,
+      destination: "Lobatse",
+      status: "DRAFT",
+      priority: "LOW",
+      cargo: "Empty return",
+      distanceKm: 68,
+    });
+  }
+
+  await db.insert(alertRulesTable).values([
+    { orgId: org.id, kind: "SPEEDING", enabled: true, threshold: 85, severity: "HIGH", notifyEmail: true, notifySms: true, notifyPush: true },
+    { orgId: org.id, kind: "EXCESS_IDLE", enabled: true, threshold: 20, severity: "MEDIUM", notifyEmail: true, notifySms: false, notifyPush: true },
+    { orgId: org.id, kind: "GEOFENCE_BREACH", enabled: true, threshold: null, severity: "HIGH", notifyEmail: true, notifySms: true, notifyPush: true },
+  ]);
+
+  await db.insert(apiKeysTable).values({
+    orgId: org.id,
+    name: "Device gateway",
+    prefix: "aftrak_demo01",
+    keyHash: "seed-not-a-real-usable-key",
+    scopes: ["ingest"],
+  });
+  await db.insert(webhooksTable).values({
+    orgId: org.id,
+    url: "https://example.com/hooks/aftrak",
+    events: ["alert.raised", "geofence.breach"],
+    secret: "whsec_seed_demo",
+    active: true,
+  });
 
   await db.insert(usersTable).values({
     orgId: org.id,

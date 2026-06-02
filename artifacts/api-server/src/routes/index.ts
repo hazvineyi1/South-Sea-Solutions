@@ -8,6 +8,14 @@ import setupRouter from "./setup";
 import trainingRouter from "./training";
 import platformRouter from "./platform";
 import contactRouter from "./contact";
+import telematicsRouter from "./telematics";
+import geofencesRouter from "./geofences";
+import behaviorRouter from "./behavior";
+import maintenanceRouter from "./maintenance";
+import dispatchRouter from "./dispatch";
+import analyticsRouter from "./analytics";
+import complianceRouter from "./compliance";
+import integrationsRouter from "./integrations";
 
 const router: IRouter = Router();
 
@@ -20,5 +28,13 @@ router.use(setupRouter);
 router.use(trainingRouter);
 router.use(platformRouter);
 router.use(contactRouter);
+router.use(telematicsRouter);
+router.use(geofencesRouter);
+router.use(behaviorRouter);
+router.use(maintenanceRouter);
+router.use(dispatchRouter);
+router.use(analyticsRouter);
+router.use(complianceRouter);
+router.use(integrationsRouter);
 
 export default router;

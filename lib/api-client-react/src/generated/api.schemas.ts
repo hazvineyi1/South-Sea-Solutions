@@ -439,6 +439,535 @@ export interface EnterOrgInput {
   orgId: string;
 }
 
+export interface ScoreCard {
+  label: string;
+  score: number;
+  /** Change versus the prior period (positive is better). */
+  delta: number;
+  unit: string;
+}
+
+export interface IntelligenceInsight {
+  id: string;
+  severity: string;
+  title: string;
+  detail: string;
+  area: string;
+  /** @nullable */
+  driverId?: string | null;
+  /** @nullable */
+  vehicleId?: string | null;
+}
+
+export interface FleetIntelligence {
+  healthScore: number;
+  safetyScore: number;
+  efficiencyScore: number;
+  complianceScore: number;
+  utilizationPct: number;
+  openAlerts: number;
+  activeFaults: number;
+  dueServices: number;
+  geofenceBreaches: number;
+  openJobs: number;
+  scorecards: ScoreCard[];
+  insights: IntelligenceInsight[];
+}
+
+export interface FaultCodeItem {
+  id: string;
+  code: string;
+  description: string;
+  system: string;
+  severity: string;
+  active: boolean;
+  occurredAt: string;
+}
+
+export interface VehicleHealthRow {
+  vehicleId: string;
+  reg: string;
+  driverName: string;
+  healthScore: number;
+  milOn: boolean;
+  /** @nullable */
+  engineTempC?: number | null;
+  /** @nullable */
+  batteryV?: number | null;
+  /** @nullable */
+  oilLifePct?: number | null;
+  /** @nullable */
+  defLevelPct?: number | null;
+  /** @nullable */
+  tirePressureKpa?: number | null;
+  /** @nullable */
+  engineHours?: number | null;
+  activeFaults: number;
+  /** @nullable */
+  nextServiceInKm?: number | null;
+  /** @nullable */
+  nextServiceInDays?: number | null;
+  /** @nullable */
+  recordedAt?: string | null;
+}
+
+export interface MaintenanceDueItem {
+  planId: string;
+  name: string;
+  vehicleId: string;
+  vehicleReg: string;
+  /** VALID, DUE_SOON or OVERDUE. */
+  state: string;
+  /** @nullable */
+  dueInKm?: number | null;
+  /** @nullable */
+  dueInDays?: number | null;
+  /** @nullable */
+  lastServiceOn?: string | null;
+}
+
+export interface VehicleHealthDetail {
+  vehicleId: string;
+  reg: string;
+  driverName: string;
+  healthScore: number;
+  milOn: boolean;
+  /** @nullable */
+  engineTempC?: number | null;
+  /** @nullable */
+  coolantTempC?: number | null;
+  /** @nullable */
+  oilPressureKpa?: number | null;
+  /** @nullable */
+  oilLifePct?: number | null;
+  /** @nullable */
+  batteryV?: number | null;
+  /** @nullable */
+  tirePressureKpa?: number | null;
+  /** @nullable */
+  engineHours?: number | null;
+  /** @nullable */
+  defLevelPct?: number | null;
+  /** @nullable */
+  odometerKm?: number | null;
+  /** @nullable */
+  recordedAt?: string | null;
+  faults: FaultCodeItem[];
+  plans: MaintenanceDueItem[];
+}
+
+export interface Geofence {
+  id: string;
+  name: string;
+  kind: string;
+  centerLat: number;
+  centerLng: number;
+  radiusM: number;
+  active: boolean;
+}
+
+export type GeofenceInputKind = typeof GeofenceInputKind[keyof typeof GeofenceInputKind];
+
+
+export const GeofenceInputKind = {
+  DEPOT: 'DEPOT',
+  CORRIDOR: 'CORRIDOR',
+  BORDER: 'BORDER',
+  CUSTOMER: 'CUSTOMER',
+  NOGO: 'NOGO',
+} as const;
+
+export interface GeofenceInput {
+  /** @minLength 1 */
+  name: string;
+  kind: GeofenceInputKind;
+  centerLat: number;
+  centerLng: number;
+  /** @minimum 50 */
+  radiusM: number;
+  active?: boolean;
+}
+
+export type GeofenceUpdateKind = typeof GeofenceUpdateKind[keyof typeof GeofenceUpdateKind];
+
+
+export const GeofenceUpdateKind = {
+  DEPOT: 'DEPOT',
+  CORRIDOR: 'CORRIDOR',
+  BORDER: 'BORDER',
+  CUSTOMER: 'CUSTOMER',
+  NOGO: 'NOGO',
+} as const;
+
+export interface GeofenceUpdate {
+  /** @minLength 1 */
+  name?: string;
+  kind?: GeofenceUpdateKind;
+  centerLat?: number;
+  centerLng?: number;
+  /** @minimum 50 */
+  radiusM?: number;
+  active?: boolean;
+}
+
+export interface GeofenceEventItem {
+  id: string;
+  geofenceName: string;
+  geofenceKind: string;
+  driverId: string;
+  driverName: string;
+  vehicleReg: string;
+  type: string;
+  recordedAt: string;
+}
+
+export interface BehaviorDriverRow {
+  driverId: string;
+  driverName: string;
+  behaviorScore: number;
+  eventCount: number;
+  harshEvents: number;
+  speedingEvents: number;
+  idleEvents: number;
+  distractionEvents: number;
+}
+
+export interface BehaviorEventItem {
+  id: string;
+  driverId: string;
+  driverName: string;
+  vehicleReg: string;
+  type: string;
+  severity: string;
+  /** @nullable */
+  value?: number | null;
+  /** @nullable */
+  placeLabel?: string | null;
+  recordedAt: string;
+}
+
+export interface BehaviorTypeCount {
+  type: string;
+  count: number;
+}
+
+export interface BehaviorOverview {
+  fleetScore: number;
+  totalEvents: number;
+  drivers: BehaviorDriverRow[];
+  recent: BehaviorEventItem[];
+  byType: BehaviorTypeCount[];
+}
+
+export interface WorkOrderItem {
+  id: string;
+  vehicleId: string;
+  vehicleReg: string;
+  title: string;
+  /** @nullable */
+  detail?: string | null;
+  status: string;
+  priority: string;
+  /** @nullable */
+  dueOn?: string | null;
+  /** @nullable */
+  dueKm?: number | null;
+  /** @nullable */
+  costEstimate?: number | null;
+  createdAt: string;
+  /** @nullable */
+  completedOn?: string | null;
+}
+
+export type WorkOrderInputPriority = typeof WorkOrderInputPriority[keyof typeof WorkOrderInputPriority];
+
+
+export const WorkOrderInputPriority = {
+  LOW: 'LOW',
+  MEDIUM: 'MEDIUM',
+  HIGH: 'HIGH',
+} as const;
+
+export interface WorkOrderInput {
+  /** @minLength 1 */
+  vehicleId: string;
+  /** @minLength 1 */
+  title: string;
+  detail?: string;
+  priority?: WorkOrderInputPriority;
+  dueOn?: string;
+  dueKm?: number;
+  costEstimate?: number;
+}
+
+export type WorkOrderUpdateStatus = typeof WorkOrderUpdateStatus[keyof typeof WorkOrderUpdateStatus];
+
+
+export const WorkOrderUpdateStatus = {
+  OPEN: 'OPEN',
+  IN_PROGRESS: 'IN_PROGRESS',
+  DONE: 'DONE',
+  CANCELLED: 'CANCELLED',
+} as const;
+
+export type WorkOrderUpdatePriority = typeof WorkOrderUpdatePriority[keyof typeof WorkOrderUpdatePriority];
+
+
+export const WorkOrderUpdatePriority = {
+  LOW: 'LOW',
+  MEDIUM: 'MEDIUM',
+  HIGH: 'HIGH',
+} as const;
+
+export interface WorkOrderUpdate {
+  /** @minLength 1 */
+  title?: string;
+  detail?: string;
+  status?: WorkOrderUpdateStatus;
+  priority?: WorkOrderUpdatePriority;
+  dueOn?: string;
+  dueKm?: number;
+  costEstimate?: number;
+}
+
+export interface MaintenanceBoard {
+  overdue: number;
+  dueSoon: number;
+  openWorkOrders: number;
+  due: MaintenanceDueItem[];
+  workOrders: WorkOrderItem[];
+}
+
+export interface DispatchJobItem {
+  id: string;
+  reference: string;
+  /** @nullable */
+  driverId?: string | null;
+  /** @nullable */
+  driverName?: string | null;
+  /** @nullable */
+  vehicleId?: string | null;
+  /** @nullable */
+  vehicleReg?: string | null;
+  origin: string;
+  destination: string;
+  status: string;
+  priority: string;
+  /** @nullable */
+  cargo?: string | null;
+  /** @nullable */
+  weightKg?: number | null;
+  /** @nullable */
+  distanceKm?: number | null;
+  /** @nullable */
+  scheduledFor?: string | null;
+  /** @nullable */
+  deliveredAt?: string | null;
+  createdAt: string;
+  unreadMessages: number;
+}
+
+export type DispatchJobInputPriority = typeof DispatchJobInputPriority[keyof typeof DispatchJobInputPriority];
+
+
+export const DispatchJobInputPriority = {
+  LOW: 'LOW',
+  MEDIUM: 'MEDIUM',
+  HIGH: 'HIGH',
+} as const;
+
+export interface DispatchJobInput {
+  /** @minLength 1 */
+  reference: string;
+  /** @minLength 1 */
+  origin: string;
+  /** @minLength 1 */
+  destination: string;
+  driverId?: string;
+  vehicleId?: string;
+  priority?: DispatchJobInputPriority;
+  cargo?: string;
+  weightKg?: number;
+  distanceKm?: number;
+  scheduledFor?: string;
+}
+
+export type DispatchJobUpdateStatus = typeof DispatchJobUpdateStatus[keyof typeof DispatchJobUpdateStatus];
+
+
+export const DispatchJobUpdateStatus = {
+  DRAFT: 'DRAFT',
+  ASSIGNED: 'ASSIGNED',
+  EN_ROUTE: 'EN_ROUTE',
+  DELIVERED: 'DELIVERED',
+  CANCELLED: 'CANCELLED',
+} as const;
+
+export type DispatchJobUpdatePriority = typeof DispatchJobUpdatePriority[keyof typeof DispatchJobUpdatePriority];
+
+
+export const DispatchJobUpdatePriority = {
+  LOW: 'LOW',
+  MEDIUM: 'MEDIUM',
+  HIGH: 'HIGH',
+} as const;
+
+export interface DispatchJobUpdate {
+  /** @nullable */
+  driverId?: string | null;
+  /** @nullable */
+  vehicleId?: string | null;
+  status?: DispatchJobUpdateStatus;
+  priority?: DispatchJobUpdatePriority;
+  cargo?: string;
+  weightKg?: number;
+  distanceKm?: number;
+  scheduledFor?: string;
+}
+
+export interface DispatchMessageItem {
+  id: string;
+  direction: string;
+  body: string;
+  sentAt: string;
+  /** @nullable */
+  readAt?: string | null;
+}
+
+export interface DispatchMessageInput {
+  /** @minLength 1 */
+  body: string;
+}
+
+export interface AnalyticsSeriesPoint {
+  label: string;
+  distanceKm: number;
+  fuelLitres: number;
+  events: number;
+}
+
+export interface AnalyticsBreakdownItem {
+  label: string;
+  value: number;
+}
+
+export interface AnalyticsReport {
+  totalDistanceKm: number;
+  totalFuelLitres: number;
+  avgEfficiencyL100km: number;
+  co2Tonnes: number;
+  idlePct: number;
+  utilizationPct: number;
+  series: AnalyticsSeriesPoint[];
+  safetyByDriver: AnalyticsBreakdownItem[];
+  distanceByVehicle: AnalyticsBreakdownItem[];
+  incidentsByType: AnalyticsBreakdownItem[];
+}
+
+export interface DriverHosRow {
+  driverId: string;
+  driverName: string;
+  status: string;
+  hours: HosClocks;
+  certifiedDays: number;
+  uncertifiedDays: number;
+  /** @nullable */
+  lastCertifiedOn?: string | null;
+}
+
+export interface AlertRule {
+  kind: string;
+  enabled: boolean;
+  /** @nullable */
+  threshold?: number | null;
+  severity: string;
+  notifyEmail: boolean;
+  notifySms: boolean;
+  notifyPush: boolean;
+}
+
+export type AlertRuleUpdateSeverity = typeof AlertRuleUpdateSeverity[keyof typeof AlertRuleUpdateSeverity];
+
+
+export const AlertRuleUpdateSeverity = {
+  LOW: 'LOW',
+  MEDIUM: 'MEDIUM',
+  HIGH: 'HIGH',
+} as const;
+
+export interface AlertRuleUpdate {
+  enabled?: boolean;
+  /** @nullable */
+  threshold?: number | null;
+  severity?: AlertRuleUpdateSeverity;
+  notifyEmail?: boolean;
+  notifySms?: boolean;
+  notifyPush?: boolean;
+}
+
+export interface ApiKeyItem {
+  id: string;
+  name: string;
+  prefix: string;
+  scopes: string[];
+  /** @nullable */
+  lastUsedAt?: string | null;
+  createdAt: string;
+  revoked: boolean;
+}
+
+export interface ApiKeyInput {
+  /** @minLength 1 */
+  name: string;
+  scopes?: string[];
+}
+
+export interface ApiKeyCreated {
+  id: string;
+  name: string;
+  prefix: string;
+  /** The plaintext key, shown only once at creation. */
+  key: string;
+  scopes: string[];
+  createdAt: string;
+}
+
+export interface WebhookItem {
+  id: string;
+  url: string;
+  events: string[];
+  active: boolean;
+  createdAt: string;
+  /** @nullable */
+  lastDeliveryAt?: string | null;
+  /** @nullable */
+  lastStatus?: number | null;
+}
+
+export interface WebhookInput {
+  /** @minLength 1 */
+  url: string;
+  events: string[];
+}
+
+export interface TelemetryPingInput {
+  vehicleReg: string;
+  lat: number;
+  lng: number;
+  speedKph: number;
+  placeLabel?: string;
+  recordedAt: string;
+}
+
+export interface TelemetryIngest {
+  pings: TelemetryPingInput[];
+}
+
+export interface IngestReceipt {
+  accepted: number;
+  rejected: number;
+}
+
 export type GetPlatformAuditLogsParams = {
 /**
  * Maximum number of entries to return (1 to 200).
