@@ -20,10 +20,10 @@ export default function Home() {
         Client portal
       </Link>
       <a
-        href="https://aftrak.southseasolutions.com"
+        href="https://beltari.southseasolutions.com"
         className="fixed right-44 top-5 z-50 inline-flex items-center gap-2 rounded-full border border-border bg-background/70 px-4 py-2 text-sm font-medium text-foreground backdrop-blur transition-colors hover:border-primary hover:text-primary"
       >
-        Aftrak
+        Beltari
       </a>
       <Hero />
       <Capabilities />
