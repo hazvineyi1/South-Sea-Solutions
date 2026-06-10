@@ -1,0 +1,73 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+# Cancel superseded runs on the same ref to save CI minutes.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/ssstest
+      SESSION_SECRET: ci-session-secret
+      # Build-time vars the web app's vite config requires.
+      BASE_PATH: /
+      PORT: "8080"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.33.0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      # Start Postgres in a visible step (rather than a service container) so any
+      # database setup failure shows up in the step log.
+      - name: Start Postgres
+        run: |
+          docker run -d --name ssspg \
+            -e POSTGRES_USER=postgres \
+            -e POSTGRES_PASSWORD=postgres \
+            -e POSTGRES_DB=ssstest \
+            -p 5432:5432 \
+            postgres:16
+          for i in $(seq 1 30); do
+            if docker exec ssspg pg_isready -U postgres -h localhost; then
+              echo "Postgres is ready"
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "Postgres did not become ready in time" >&2
+          docker logs ssspg
+          exit 1
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Typecheck
+        run: pnpm run typecheck
+
+      - name: Push database schema
+        run: pnpm --filter @workspace/db run push
+
+      - name: Test (api-server)
+        run: pnpm --filter @workspace/api-server run test
+
+      - name: Build
+        run: pnpm -r --if-present run build
