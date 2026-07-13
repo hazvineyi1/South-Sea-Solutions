@@ -1,23 +1,24 @@
-import { Switch, Route, Redirect, Router as WouterRouter } from "wouter";
+import { Switch, Route, Router as WouterRouter } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { AuthProvider } from "@/portal/auth";
-import { RequireAuth, RequireSuperadmin, PortalIndex } from "@/portal/guards";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
-import LoginPage from "@/pages/portal/login";
-import CommandPage from "@/pages/portal/command";
-import TrainingPage from "@/pages/portal/training";
-import TrainingModulePage from "@/pages/portal/training-module";
-import DriverRecordPage from "@/pages/portal/driver-record";
-import DriverHomePage from "@/pages/portal/driver-home";
-import ConsoleOverviewPage from "@/pages/console/overview";
-import ConsoleOrgsPage from "@/pages/console/orgs";
-import ConsoleOrgDetailPage from "@/pages/console/org-detail";
-import ConsoleTrainingPage from "@/pages/console/training";
-import ConsoleMessagesPage from "@/pages/console/messages";
-import ConsoleAuditLogsPage from "@/pages/console/AuditLogsPage";
+
+/**
+ * South Sea Solutions: the public site, and nothing else.
+ *
+ * This app used to carry a second product inside it. Aftrak was a fleet and
+ * driver-certification portal (/login, /portal/*, /console/*) with its own auth,
+ * its own superadmin console, and twenty database tables behind it. It has been
+ * removed: Beltari replaces it, and the site now sends people there instead.
+ *
+ * What is deliberately NOT here any more: AuthProvider, RequireAuth,
+ * RequireSuperadmin. This is a marketing site. It has no logged-in state, so it
+ * should not carry the machinery for one. Leaving an auth context wrapped around
+ * a set of purely public pages is how a codebase keeps a login system alive long
+ * after the thing it protected has gone.
+ */
 
 const queryClient = new QueryClient();
 
@@ -25,69 +26,6 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={Home} />
-      <Route path="/login" component={LoginPage} />
-      <Route path="/portal" component={PortalIndex} />
-      <Route path="/portal/command">
-        <RequireAuth roles={["OWNER"]}>
-          <CommandPage />
-        </RequireAuth>
-      </Route>
-      <Route path="/training">
-        <RequireAuth>
-          <TrainingPage />
-        </RequireAuth>
-      </Route>
-      <Route path="/training/:slug">
-        <RequireAuth>
-          <TrainingModulePage />
-        </RequireAuth>
-      </Route>
-      <Route path="/portal/training">
-        <Redirect to="/training" />
-      </Route>
-      <Route path="/portal/training/:slug">
-        {(params) => <Redirect to={`/training/${params.slug}`} />}
-      </Route>
-      <Route path="/portal/me">
-        <RequireAuth roles={["DRIVER"]}>
-          <DriverHomePage />
-        </RequireAuth>
-      </Route>
-      <Route path="/portal/drivers/:id">
-        <RequireAuth>
-          <DriverRecordPage />
-        </RequireAuth>
-      </Route>
-      <Route path="/console">
-        <RequireSuperadmin>
-          <ConsoleOverviewPage />
-        </RequireSuperadmin>
-      </Route>
-      <Route path="/console/orgs">
-        <RequireSuperadmin>
-          <ConsoleOrgsPage />
-        </RequireSuperadmin>
-      </Route>
-      <Route path="/console/orgs/:id">
-        <RequireSuperadmin>
-          <ConsoleOrgDetailPage />
-        </RequireSuperadmin>
-      </Route>
-      <Route path="/console/training">
-        <RequireSuperadmin>
-          <ConsoleTrainingPage />
-        </RequireSuperadmin>
-      </Route>
-      <Route path="/console/messages">
-        <RequireSuperadmin>
-          <ConsoleMessagesPage />
-        </RequireSuperadmin>
-      </Route>
-      <Route path="/console/audit-logs">
-        <RequireSuperadmin>
-          <ConsoleAuditLogsPage />
-        </RequireSuperadmin>
-      </Route>
       <Route component={NotFound} />
     </Switch>
   );
@@ -98,9 +36,7 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-          <AuthProvider>
-            <Router />
-          </AuthProvider>
+          <Router />
         </WouterRouter>
         <Toaster />
       </TooltipProvider>
